@@ -4,11 +4,19 @@ module.exports = model;
 
 function model(sequelize) {
     const attributes = {
-        firstName: { type: DataTypes.STRING, allowNull: false },
-        lastName: { type: DataTypes.STRING, allowNull: false },
-        // username: { type: DataTypes.STRING, allowNull: false },
-        email: { type: DataTypes.STRING, allowNull: false },
-        hash: { type: DataTypes.STRING, allowNull: false }
+        presentDay: { type: DataTypes.STRING, allowNull: false },
+        absentDay: { type: DataTypes.STRING, allowNull: false },
+        userid: { type: DataTypes.INTEGER, allowNull: false },
+        // leaveDay: { type: DataTypes.STRING, allowNull: false },
+        // LeaveDay: { type: DataTypes.STRING, allowNull: false },
+        // sickLeave: { type: DataTypes.STRING, allowNull: false },
+        // casualLeave: { type: DataTypes.STRING, allowNull: false },
+        // compOff: { type: DataTypes.STRING, allowNull: false },
+        // Userid: { type: DataTypes.STRING, allowNull: false },
+        // inTime: { type: DataTypes.STRING, allowNull: false },
+        // outTime: { type: DataTypes.STRING, allowNull: false },
+        // currentDate: { type: DataTypes.STRING, allowNull: false },
+        // hash: { type: DataTypes.STRING, allowNull: false }
     };
 
     const options = {

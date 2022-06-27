@@ -7,10 +7,11 @@ const userService = require('./attendance.service');
 
 // routes
 // router.post('/authenticate', authenticateSchema, authenticate);
-router.post('/register', registerSchema, register);
-router.get('/', authorize(), getAll);
-router.get('/current', authorize(), getCurrent);
-router.get('/:id', authorize(), getById);
+router.post('/empAttendance',  authorize(),registerSchema, register);
+router.get('/getAllAttendance', authorize(), getAll);
+router.get('/getAllbyId', authorize(), getAllAtd);
+router.get('/currentAttendance', authorize(), getCurrent);
+router.get('/:userid', authorize(), getById);
 router.put('/:id', authorize(), updateSchema, update);
 router.delete('/:id', authorize(), _delete);
 
@@ -32,23 +33,30 @@ function authenticate(req, res, next) {
 
 function registerSchema(req, res, next) {
     const schema = Joi.object({
-        firstName: Joi.string().required(),
-        lastName: Joi.string().required(),
-        email: Joi.string().required(),
-        password: Joi.string().min(6).required()
+        presentDay: Joi.string().required(),
+        absentDay: Joi.string().required(),
+        userid: Joi.number().required(),
+       
     });
     validateRequest(req, next, schema);
 }
 
 function register(req, res, next) {
     userService.create(req.body)
-        .then(() => res.json({ message: 'Registration successful' }))
+        .then(() => res.json({ message: 'Registration successful',status:0}))
         .catch(next);
 }
 
 function getAll(req, res, next) {
     userService.getAll()
-        .then(users => res.json(users))
+        .then(users => res.json({ "data": users,status:0}))
+        .catch(next);
+}
+
+function getAllAtd(req, res, next) {
+    const id = req.params.userid;
+    userService.getAllbyId(req.body.userid)
+        .then(user => res.json(user))
         .catch(next);
 }
 
@@ -57,17 +65,17 @@ function getCurrent(req, res, next) {
 }
 
 function getById(req, res, next) {
-    userService.getById(req.params.id)
+    const id = req.params.userid;
+    userService.getById(req.params.userid)
         .then(user => res.json(user))
         .catch(next);
 }
 
 function updateSchema(req, res, next) {
     const schema = Joi.object({
-        firstName: Joi.string().empty(''),
-        lastName: Joi.string().empty(''),
-        email: Joi.string().empty(''),
-        password: Joi.string().min(6).empty('')
+        presentDay: Joi.string().empty(''),
+        absentDay: Joi.string().empty(''),
+        userid: Joi.number().empty('')
     });
     validateRequest(req, next, schema);
 }
@@ -80,6 +88,6 @@ function update(req, res, next) {
 
 function _delete(req, res, next) {
     userService.delete(req.params.id)
-        .then(() => res.json({ message: 'User deleted successfully' }))
+        .then(() => res.json({ message: 'Attendce deleted successfully' }))
         .catch(next);
 }

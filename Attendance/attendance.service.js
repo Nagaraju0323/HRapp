@@ -6,6 +6,7 @@ const db = require('_helpers/db');
 module.exports = {
     authenticate,
     getAll,
+    getAllbyId,
     getById,
     create,
     update,
@@ -27,20 +28,31 @@ async function getAll() {
     return await db.Attendace.findAll();
 }
 
+async function getAllbyId(userid) {
+    const user = await db.Attendace.findAndCountAll({ where: { userid } });
+    let data = {
+        count: user.count,
+        data: user.rows,
+        status : 0
+     }
+    return await data
+}
+
+
 async function getById(id) {
     return await getUser(id);
 }
 
 async function create(params) {
     // validate
-    if (await db.Attendace.findOne({ where: { email: params.email } })) {
-        throw 'email "' + params.email + '" is already taken';
-    }
+    // if (await db.Attendace.findOne({ where: { email: params.email } })) {
+    //     throw 'email "' + params.eail + '" is already taken';
+    // }
 
-    // hash password
-    if (params.password) {
-        params.hash = await bcrypt.hash(params.password, 10);
-    }
+    // // hash password
+    // if (params.password) {
+    //     params.hash = await bcrypt.hash(params.password, 10);
+    // }
 
     // save user
     await db.Attendace.create(params);

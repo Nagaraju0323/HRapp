@@ -8,8 +8,6 @@ const { secret } = require('config.json');
 const db = require('_helpers/db');
 const { JsonWebTokenError } = require('jsonwebtoken');
 
-
-
 module.exports = authorize;
 
 function authorize() {
