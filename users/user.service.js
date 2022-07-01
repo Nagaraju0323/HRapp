@@ -2,17 +2,21 @@ const config = require('config.json');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const db = require('_helpers/db');
+const { Sequelize, Op } = require("sequelize");
 
 module.exports = {
     authenticate,
     getAll,
+    getAlls,
     getById,
     create,
     update,
-    delete: _delete
+    delete: _delete,
+    
 };
 
 async function authenticate({ email, password }) {
+  
     const user = await db.User.scope('withHash').findOne({ where: { email } });
 
     if (!user || !(await bcrypt.compare(password, user.hash)))
@@ -26,6 +30,32 @@ async function authenticate({ email, password }) {
 async function getAll() {
     return await db.User.findAll();
 }
+//SearchItems
+async function getAlls(firstName) {
+    let data = [];
+    const user = await db.User.findAll({
+            where: Sequelize.where(Sequelize.fn("concat", Sequelize.col("firstName"), Sequelize.col("lastName")), {
+                [Op.like]: '%' + firstName + '%',
+
+            })
+          });
+
+   console.log(user.length)
+   if (user.length === 0){
+    data = {
+        "error":'Search Items Notfound',
+        status : 0
+     }
+
+   }else {
+    data = {
+        "data":user,
+        status : 0
+     }
+   }
+   
+    return await data
+}
 
 async function getById(id) {
     return await getUser(id);
@@ -37,6 +67,9 @@ async function create(params) {
         throw 'email "' + params.email + '" is already taken';
     }
 
+    if (await db.User.findOne({ where: { mobileNo: params.mobileNo } })) {
+        throw 'mobileNo "' + params.mobileNo + '" is already taken';
+    }
     // hash password
     if (params.password) {
         params.hash = await bcrypt.hash(params.password, 10);
@@ -53,6 +86,11 @@ async function update(id, params) {
     const emailChanged = params.email && user.email !== params.email;
     if (emailChanged && await db.User.findOne({ where: { email: params.email } })) {
         throw 'email "' + params.email + '" is already taken';
+    }
+   
+    const mobileNoChanged = params.mobileNo && user.mobileNo !== params.mobileNo;
+    if (mobileNoChanged && await db.User.findOne({ where: { mobileNo: params.mobileNo } })) {
+        throw 'mobileNo "' + params.mobileNo + '" is already taken';
     }
 
     // hash password if it was entered
@@ -84,3 +122,4 @@ function omitHash(user) {
     const { hash, ...userWithoutHash } = user;
     return userWithoutHash;
 }
+

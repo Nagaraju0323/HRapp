@@ -13,7 +13,7 @@ const userService = require('./department.service');
 // router.get('/:id', authorize(), getById);
 // router.put('/:id', authorize(), updateSchema, update);
 // router.delete('/:id', authorize(), _delete);
-router.post('/authenticate', authenticateSchema, authenticate);
+router.post('/addDepartment', authenticateSchema, authenticate);
 router.post('/addDepartment', registerSchema, register);
 router.get('/allDepartments', getAll);
 router.get('/current', getCurrent);

@@ -15,6 +15,7 @@ router.get('/:userid', authorize(), getById);
 router.put('/:id', authorize(), updateSchema, update);
 router.delete('/:id', authorize(), _delete);
 
+
 module.exports = router;
 
 function authenticateSchema(req, res, next) {
