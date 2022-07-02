@@ -3,8 +3,6 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const db = require('_helpers/db');
 const { Sequelize, Op } = require("sequelize");
-const userServices  = require("shortid");
-const userService = require('./user.service');
 
 module.exports = {
     authenticate,
@@ -12,13 +10,11 @@ module.exports = {
     getAlls,
     getById,
     create,
-    resetPassword,
     update,
     delete: _delete,
     
 };
 
-//...user Login
 async function authenticate({ email, password }) {
   
     const user = await db.User.scope('withHash').findOne({ where: { email } });
@@ -30,11 +26,11 @@ async function authenticate({ email, password }) {
     const token = jwt.sign({ sub: user.id }, config.secret, { expiresIn: '7d' });
     return { ...omitHash(user.get()), token };
 }
-//...GetAll UserInformation
+
 async function getAll() {
     return await db.User.findAll();
 }
-//...search with UserInformation
+//SearchItems
 async function getAlls(firstName) {
     let data = [];
     const user = await db.User.findAll({
@@ -43,25 +39,28 @@ async function getAlls(firstName) {
 
             })
           });
+
+   console.log(user.length)
    if (user.length === 0){
     data = {
         "error":'Search Items Notfound',
         status : 0
      }
+
    }else {
     data = {
         "data":user,
         status : 0
      }
    }
+   
     return await data
 }
-//...userInfo by UserID
+
 async function getById(id) {
     return await getUser(id);
 }
 
-//...create user
 async function create(params) {
     // validate
     if (await db.User.findOne({ where: { email: params.email } })) {
@@ -75,12 +74,11 @@ async function create(params) {
     if (params.password) {
         params.hash = await bcrypt.hash(params.password, 10);
     }
-     params.userID = userServices.generate();
 
     // save user
     await db.User.create(params);
 }
-//...update userInfo
+
 async function update(id, params) {
     const user = await getUser(id);
 
@@ -107,31 +105,6 @@ async function update(id, params) {
     return omitHash(user.get());
 }
 
-//...reset Password userInfo
-async function resetPassword(userID, params) {
-    const user = await getUserID(userID);
-    // hash password if it was entered
-    if (params.password) {
-        console.log(params.password)
-        params.hash = await bcrypt.hash(params.password, 10);
-    }
-
-    const passwordChanged = params.hash && user.hash !== params.hash;
-    if (passwordChanged && await db.User.findOne({ where: { hash: params.hash } })) {
-        throw 'password is already taken';
-    }
-   user.update({
-        params: params.hash 
-    },{ where: { userID: 1 }});
-
-    // copy params to user and save
-    Object.assign(user, params);
-    await user.save();
-
-    return omitHash(user.get());
-}
-
-
 async function _delete(id) {
     const user = await getUser(id);
     await user.destroy();
@@ -140,16 +113,7 @@ async function _delete(id) {
 // helper functions
 
 async function getUser(id) {
-
-    
     const user = await db.User.findByPk(id);
-    if (!user) throw 'User not found';
-    return user;
-}
-
-async function getUserID(userID) {
-    const user = await db.User.findOne({ where: { userID: userID } })
-    // const user = await db.User.findByPk(userID);
     if (!user) throw 'User not found';
     return user;
 }

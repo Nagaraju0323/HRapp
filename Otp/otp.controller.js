@@ -4,7 +4,8 @@ const Joi = require('joi');
 const validateRequest = require('_middleware/validate-request');
 const authorize = require('_middleware/authorize')
 const userService = require('./user.service');
-const usershortid  = require("shortid");
+
+
 
 // routes
 router.post('/login', authenticateSchema, authenticate);
@@ -13,9 +14,10 @@ router.get('/getAll', authorize(), getAll);
 router.get('/search', authorize(), getAlls);
 router.get('/current', authorize(), getCurrent);
 router.get('/:id', authorize(), getById);
-router.put('/resetPassword', authorize(),resetPassword);
 router.put('/:id', authorize(), updateSchema, update);
 router.delete('/:id', authorize(), _delete);
+
+
 
 module.exports = router;
 //...loginwith email id 
@@ -33,7 +35,10 @@ function authenticate(req, res, next) {
         .catch(next);
 }
 
-//...Registration 
+//...mobileNumber email id 
+
+
+
 function registerSchema(req, res, next) {
     const schema = Joi.object({
         firstName: Joi.string().required(),
@@ -45,8 +50,8 @@ function registerSchema(req, res, next) {
         Dob: Joi.string().required(),
         departmentName: Joi.string().required(),
         Address: Joi.string().required(),
-        profileImg: Joi.string().required(),
-       
+        profileImg: Joi.string().required()
+        
         
     });
     validateRequest(req, next, schema);
@@ -58,33 +63,33 @@ function register(req, res, next) {
         .catch(next);
 }
 
-//...Getall Users
 function getAll(req, res, next) {
     userService.getAll()
         .then(users => res.json(users))
         .catch(next);
 }
-//...search By Users
+
 function getAlls(req, res, next) {
+    // userService.getAlls()
+    //     .then(users => res.json(users))
+    //     .catch(next);
+
         const id = req.params.userid;
         userService.getAlls(req.body.firstName)
             .then(user => res.json(user))
             .catch(next);
 }
 
-//...get current UserInformation
 function getCurrent(req, res, next) {
     res.json(req.user);
 }
 
-//...get by id UserInformation
 function getById(req, res, next) {
     userService.getById(req.params.id)
         .then(user => res.json(user))
         .catch(next);
 }
 
-//...update UserInformation
 function updateSchema(req, res, next) {
     const schema = Joi.object({
         firstName: Joi.string().empty(''),
@@ -96,8 +101,7 @@ function updateSchema(req, res, next) {
         Dob: Joi.string().empty(''),
         departmentName: Joi.string().empty(''),
         Address: Joi.string().empty(''),
-        profileImg: Joi.string().empty(''),
-       
+        profileImg: Joi.string().empty('')
     });
     validateRequest(req, next, schema);
 }
@@ -108,16 +112,6 @@ function update(req, res, next) {
         .catch(next);
 }
 
-//...Reset Password
-function resetPassword(req, res, next) {
-    console.log('this is claling')
-    const id = req.params.userID;
-    userService.resetPassword(req.body.userID, req.body)
-        .then(user => res.json(user))
-        .catch(next);
-}
-
-//...Delete user
 function _delete(req, res, next) {
     userService.delete(req.params.id)
         .then(() => res.json({ message: 'User deleted successfully' }))

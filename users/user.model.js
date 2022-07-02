@@ -1,4 +1,5 @@
 const { DataTypes } = require('sequelize');
+const userService = require('./user.service');
 
 module.exports = model;
 
@@ -13,6 +14,7 @@ function model(sequelize) {
         departmentName: { type: DataTypes.STRING, allowNull:false},
         Address: { type: DataTypes.STRING, allowNull:false},
         profileImg: { type: DataTypes.STRING, allowNull:false},
+        userID: { type: DataTypes.STRING, allowNull:false},
         hash: { type: DataTypes.STRING, allowNull: false }
     };
 
