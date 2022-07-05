@@ -75,7 +75,9 @@ async function create(params) {
     if (params.password) {
         params.hash = await bcrypt.hash(params.password, 10);
     }
-     params.userID = userServices.generate();
+    // savepassword
+    // params.savepassword = params.password
+    params.userID = userServices.generate();
 
     // save user
     await db.User.create(params);
@@ -114,12 +116,25 @@ async function resetPassword(userID, params) {
     if (params.password) {
         console.log(params.password)
         params.hash = await bcrypt.hash(params.password, 10);
+        
     }
 
-    const passwordChanged = params.hash && user.hash !== params.hash;
-    if (passwordChanged && await db.User.findOne({ where: { hash: params.hash } })) {
-        throw 'password is already taken';
-    }
+    // let oldpassword = await bcrypt.hash(params.oldpassword, 10);
+    // console.log('oldpassword',oldpassword)
+    // console.log('newpassword',params.hash)
+    // console.log('userdata',user)
+
+
+    // const validPassword =  bcrypt.compare(params.oldpassword, user.hash) 
+    
+    // let result = await db.User.findOne({ where: { hash:  } })
+
+    console.log('message;;;;;;;',user.hash)
+
+    // const passwordChanged = params.hash && user.hash !== params.hash;
+    // if (passwordChanged && await db.User.findOne({ where: { hash: params.hash } })) {
+    //     throw 'password is already taken';
+    // }
    user.update({
         params: params.hash 
     },{ where: { userID: 1 }});

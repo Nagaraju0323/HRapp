@@ -46,7 +46,6 @@ function registerSchema(req, res, next) {
         departmentName: Joi.string().required(),
         Address: Joi.string().required(),
         profileImg: Joi.string().required(),
-       
         
     });
     validateRequest(req, next, schema);

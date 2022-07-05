@@ -2,124 +2,92 @@ const config = require('config.json');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const db = require('_helpers/db');
+const nodemailer = require("nodemailer");
 const { Sequelize, Op } = require("sequelize");
+const userService = require('./otp.service');
+const sgMail = require('@sendgrid/mail')
+const apiKey =
+    process.env.SENDGRID_API_KEY ||
+    "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";
+
+
+sgMail.setApiKey(apiKey);
 
 module.exports = {
-    authenticate,
-    getAll,
-    getAlls,
-    getById,
+    // authenticate,
+    // getAll,
+    // getAlls,
+    // getById,
     create,
-    update,
-    delete: _delete,
+    validOtp
+    // resetPassword,
+    // update,
+    // delete: _delete,
     
 };
 
-async function authenticate({ email, password }) {
-  
-    const user = await db.User.scope('withHash').findOne({ where: { email } });
 
-    if (!user || !(await bcrypt.compare(password, user.hash)))
-        throw 'email or password is incorrect';
-
-    // authentication successful
-    const token = jwt.sign({ sub: user.id }, config.secret, { expiresIn: '7d' });
-    return { ...omitHash(user.get()), token };
-}
-
-async function getAll() {
-    return await db.User.findAll();
-}
-//SearchItems
-async function getAlls(firstName) {
-    let data = [];
-    const user = await db.User.findAll({
-            where: Sequelize.where(Sequelize.fn("concat", Sequelize.col("firstName"), Sequelize.col("lastName")), {
-                [Op.like]: '%' + firstName + '%',
-
-            })
-          });
-
-   console.log(user.length)
-   if (user.length === 0){
-    data = {
-        "error":'Search Items Notfound',
-        status : 0
-     }
-
-   }else {
-    data = {
-        "data":user,
-        status : 0
-     }
-   }
-   
-    return await data
-}
-
-async function getById(id) {
-    return await getUser(id);
-}
-
+//...create user
 async function create(params) {
-    // validate
-    if (await db.User.findOne({ where: { email: params.email } })) {
-        throw 'email "' + params.email + '" is already taken';
-    }
 
-    if (await db.User.findOne({ where: { mobileNo: params.mobileNo } })) {
-        throw 'mobileNo "' + params.mobileNo + '" is already taken';
-    }
-    // hash password
-    if (params.password) {
-        params.hash = await bcrypt.hash(params.password, 10);
-    }
+    var rand = Math.floor(Math.random() * 10000);
+    var randStr = rand.toString()
+    params.otp = randStr
+    params.mobileNo = "1234"
 
-    // save user
-    await db.User.create(params);
+
+//recvied opt for 
+
+  let transporter = nodemailer.createTransport({
+    host: "smtp-relay.sendinblue.com",
+    port: 587,
+    secure: false, // true for 465, false for other ports
+    auth: {
+      user: 'nagarajukios85@gmail.com', // generated ethereal user
+      pass: '2caLzXZ8PwJIn7Qk', // generated ethereal password
+    },
+  });
+
+  // send mail with defined transport object
+  let info = await transporter.sendMail({
+    from: '"Fred Foo 👻" <nagarajukios85@gmail.com>', // sender address
+    to: "chinnu2123@gmail.com", // list of receivers
+    subject: "Hello ✔", // Subject line
+    text: "Hello world?", // plain text body
+    html: "<b>Hello world?</b>", // html body
+  });
+
+    var msg = {
+        to: 'chinnu2123@gmail.com',
+        from: 'nagarajukios85@gmail.com',
+        subject: 'hi',
+        text: 'bye',
+        html: '<strong>and easy to do anywhere, even with Node.js</strong>',
+      };
+
+      sgMail
+        .send(msg)
+        .then(() => {
+          logger.debug("Email sent");
+          sendResponse(
+            res,
+            response.error === undefined
+              ? "Success!"
+              : "Something went wrong!", //token
+            response.error
+          );
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    
 }
 
-async function update(id, params) {
-    const user = await getUser(id);
-
-    // validate
-    const emailChanged = params.email && user.email !== params.email;
-    if (emailChanged && await db.User.findOne({ where: { email: params.email } })) {
-        throw 'email "' + params.email + '" is already taken';
-    }
-   
-    const mobileNoChanged = params.mobileNo && user.mobileNo !== params.mobileNo;
-    if (mobileNoChanged && await db.User.findOne({ where: { mobileNo: params.mobileNo } })) {
-        throw 'mobileNo "' + params.mobileNo + '" is already taken';
-    }
-
-    // hash password if it was entered
-    if (params.password) {
-        params.hash = await bcrypt.hash(params.password, 10);
-    }
-
-    // copy params to user and save
-    Object.assign(user, params);
-    await user.save();
-
-    return omitHash(user.get());
-}
-
-async function _delete(id) {
-    const user = await getUser(id);
-    await user.destroy();
-}
-
-// helper functions
-
-async function getUser(id) {
-    const user = await db.User.findByPk(id);
+//validatation for OTP 
+async function validOtp() {
+    const user = await db.Otp.findOne({ where: { userID: userID } })
+    // const user = await db.User.findByPk(userID);
     if (!user) throw 'User not found';
     return user;
-}
-
-function omitHash(user) {
-    const { hash, ...userWithoutHash } = user;
-    return userWithoutHash;
 }
 

@@ -18,6 +18,10 @@ app.use('/hr', require('./Hr/hr.controller'));
 
 app.use('/Attendace', require('./Attendance/attendance.controller'));
 
+app.use('/Otp', require('./Otp/otp.controller'));
+
+
+
 // global error handler
 app.use(errorHandler);
 
