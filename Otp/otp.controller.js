@@ -7,8 +7,8 @@ const userService = require('./otp.service');
 
 
 // routes
-router.post('/sendOtpMobile', registerSchema, registerMobile);
-router.post('/sendOtpEmail',registerSchema, registerEamil);
+router.post('/sendOtpMobile', registerMobile);
+router.post('/sendOtpEmail', registerEamil);
 router.post('/validationOtp',validationOtp);
 
 module.exports = router;
@@ -30,7 +30,7 @@ function registerMobile(req, res, next) {
 }
 
 function registerEamil(req, res, next) {
-    userService.create(req.body)
+    userService.sendOtpMobile(req.body)
         .then(() => res.json({ message: 'Registration successful' }))
         .catch(next);
 }

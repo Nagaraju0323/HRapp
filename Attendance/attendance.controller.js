@@ -7,7 +7,8 @@ const userService = require('./attendance.service');
 
 // routes
 // router.post('/authenticate', authenticateSchema, authenticate);
-router.post('/empAttendance',  authorize(),registerSchema, register);
+router.post('/empAttendanceIn',  authorize(),registerSchema, employeeInTime);
+router.post('/empAttendanceOut',  authorize(),registerSchemaOut, employeeOutTime);
 router.get('/getAllAttendance', authorize(), getAll);
 router.get('/getAllbyId', authorize(), getAllAtd);
 router.get('/currentAttendance', authorize(), getCurrent);
@@ -35,18 +36,36 @@ function authenticate(req, res, next) {
 function registerSchema(req, res, next) {
     const schema = Joi.object({
         presentDay: Joi.string().required(),
-        absentDay: Joi.string().required(),
-        userid: Joi.number().required(),
+        userid: Joi.string().required(),
        
     });
     validateRequest(req, next, schema);
 }
 
-function register(req, res, next) {
-    userService.create(req.body)
-        .then(() => res.json({ message: 'Registration successful',status:0}))
+function registerSchemaOut(req, res, next) {
+    const schema = Joi.object({
+        presentDay: Joi.string().required(),
+        userid: Joi.string().required(),
+       
+    });
+    validateRequest(req, next, schema);
+}
+
+
+//..employee Intime 
+function employeeInTime(req, res, next) {
+    userService.inTime(req.body)
+        .then(() => res.json({ message: 'successful In',status:0}))
         .catch(next);
 }
+//..employee Intime 
+function employeeOutTime(req, res, next) {
+    userService.OutTime(req.body)
+        .then(() => res.json({ message: 'successfully out',status:0}))
+        .catch(next);
+}
+
+//..get by userID
 
 function getAll(req, res, next) {
     userService.getAll()
