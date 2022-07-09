@@ -4,6 +4,7 @@ const bcrypt = require('bcryptjs');
 const db = require('_helpers/db');
 var dateTime = require('node-datetime');
 const { text } = require('body-parser');
+var moment = require('moment')
 
 module.exports = {
     authenticate,
@@ -49,7 +50,7 @@ async function inTime(params) {
     
     let userid = params.userid
     var dt = dateTime.create();
-    var formatted = dt.format('d-m-Y H:M:S');
+    var formatted = dt.format('d-m-Y H:M:S p');
     var currentdate = dt.format('d-m-Y');
     const user = await db.Attendace.findAndCountAll({ where: { userid } });
     
@@ -74,40 +75,63 @@ async function OutTime(params) {
    
     let userid = params.userid
     var dt = dateTime.create();
-    var formatted = dt.format('d-m-Y H:M:S');
+    var formatted = dt.format('d-m-Y H:M:S p');
     var currentdate = dt.format('d-m-Y');
+    var currenttime = dt.format('H:M:S');
     const user = await db.Attendace.findAndCountAll({ where: { userid } });
+    var inTimeStatus = ""
+    var presentTimeStamp = ""
     //...check user Alreadylogin 
     
     for (let i = 0; i < user.count; i++) { 
-        var timesplit = user.rows[i].outTime.split(' ')[0];
-        var inTimeload = user.rows[i].inTime.split(' ')[1];
-        console.log('messageLoad',timesplit)
-        if (currentdate.toString === timesplit.toString){
-            if (user) throw 'already logout';
-        return user;
-        }else {
-            
-            var inTimeload = user.rows[i].inTime.split(' ')[1];
+        var inTimestm = user.rows[i].inTime.split(' ')[0];
+        if (inTimestm == currentdate){
+            presentTimeStamp = user.rows[i].inTime;
+        }
+        if (user.rows[i].outTime != null){
             var timesplit = user.rows[i].outTime.split(' ')[0];
+            if (currentdate == timesplit){
+                if (user) throw 'already logout';
+            return user;
+            }
         }
     }
+
+    
+    
+    // let timesplit = user.rows[i].outTime.split(' ')[1];
+    // console.log('currentloadmessage',inTimeload)
+    // console.log('currenttimesplit',timesplit)
+
+    // var startTime = moment("12:16:59 am", 'hh:mm:ss');
+    // var endTime = moment("06:12:07 pm", 'hh:mm:ss a');
+    
+
     const users = await getUserID(params.userid);
+    params.outTime =  formatted
     users.update({
         params: params.outTime,
-        params: params.inSatus =  "1"
+        params: params.outStatus =  "1"
     },{ where: { userid: params.userid }});
+
+    var a = moment(inTimestm, "HH:mm:ss")
+    var b = moment(currenttime, "HH:mm:ss")
+    // var secondsDiff = b.diff(a, 'hours') // 12
+   
+
+    var secondsDiff = moment.utc(moment(b,"HH:mm:ss").diff(moment(a," HH:mm:ss"))).format("HH:mm:ss")
+    console.log('presentTimeStamp',secondsDiff)
 
     // copy params to user and save
     Object.assign(users, params);
-    await user.save();
+    await users.save();
     return omitHash(users.get());
 }
 
 async function getUserID(userid) {
     const user = await db.Attendace.findOne({ where: { userid: userid } })
     // const user = await db.User.findByPk(userID);
-    if (!user) throw 'User not found';
+    if (!user) throw ' Not found';
     return user;
 }
 
