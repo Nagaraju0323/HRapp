@@ -14,7 +14,7 @@ function model(sequelize) {
         departmentName: { type: DataTypes.STRING, allowNull:false},
         Address: { type: DataTypes.STRING, allowNull:false},
         profileImg: { type: DataTypes.STRING, allowNull:false},
-        userID: { type: DataTypes.STRING, allowNull:false},
+        userID: { type: DataTypes.INTEGER, allowNull:false},
         hash: { type: DataTypes.STRING, allowNull: false }
     };
 

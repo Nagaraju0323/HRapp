@@ -9,8 +9,11 @@ const userService = require('./attendance.service');
 // router.post('/authenticate', authenticateSchema, authenticate);
 router.post('/empAttendanceIn',  authorize(),registerSchema, employeeInTime);
 router.post('/empAttendanceOut',  authorize(),registerSchemaOut, employeeOutTime);
+//..leaveapply 
+// router.post('/empApplyLeave',  authorize(),registerapplyLeave, employeeApplyLeave);
 router.get('/getAllAttendance', authorize(), getAll);
 router.get('/getAllbyId', authorize(), getAllAtd);
+router.get('/getCurrentDate', authorize(), getAllAtd);
 router.get('/currentAttendance', authorize(), getCurrent);
 router.get('/:userid', authorize(), getById);
 router.put('/:id', authorize(), updateSchema, update);
@@ -36,16 +39,26 @@ function authenticate(req, res, next) {
 function registerSchema(req, res, next) {
     const schema = Joi.object({
         presentDay: Joi.string().required(),
-        userid: Joi.string().required(),
+        userID: Joi.number().required(),
+       
+    });
+    validateRequest(req, next, schema);
+}
+//..Apply Leave
+function registerapplyLeave(req, res, next) {
+    const schema = Joi.object({
+        presentDay: Joi.string().required(),
+        userID: Joi.number().required(),
        
     });
     validateRequest(req, next, schema);
 }
 
+
 function registerSchemaOut(req, res, next) {
     const schema = Joi.object({
         presentDay: Joi.string().required(),
-        userid: Joi.string().required(),
+        userID: Joi.number().required(),
        
     });
     validateRequest(req, next, schema);
@@ -74,8 +87,8 @@ function getAll(req, res, next) {
 }
 
 function getAllAtd(req, res, next) {
-    const id = req.params.userid;
-    userService.getAllbyId(req.body.userid)
+    const id = req.params.userID;
+    userService.getAllbyId(req.body.userID)
         .then(user => res.json(user))
         .catch(next);
 }
@@ -85,8 +98,8 @@ function getCurrent(req, res, next) {
 }
 
 function getById(req, res, next) {
-    const id = req.params.userid;
-    userService.getById(req.params.userid)
+    const id = req.params.userID;
+    userService.getById(req.params.userID)
         .then(user => res.json(user))
         .catch(next);
 }
@@ -95,7 +108,7 @@ function updateSchema(req, res, next) {
     const schema = Joi.object({
         presentDay: Joi.string().empty(''),
         absentDay: Joi.string().empty(''),
-        userid: Joi.number().empty('')
+        userID: Joi.number().empty('')
     });
     validateRequest(req, next, schema);
 }

@@ -4,7 +4,9 @@ const bcrypt = require('bcryptjs');
 const db = require('_helpers/db');
 var dateTime = require('node-datetime');
 const { text } = require('body-parser');
-var moment = require('moment')
+var moment = require('moment');
+const { param } = require('./attendance.controller');
+const date_ob = new Date();
 
 module.exports = {
     authenticate,
@@ -32,8 +34,8 @@ async function getAll() {
     return await db.Attendace.findAll();
 }
 
-async function getAllbyId(userid) {
-    const user = await db.Attendace.findAndCountAll({ where: { userid } });
+async function getAllbyId(userID) {
+    const user = await db.Attendace.findAndCountAll({ where: { userID } });
     let data = {
         count: user.count,
         data: user.rows,
@@ -48,23 +50,46 @@ async function getById(id) {
 
 async function inTime(params) {
     
-    let userid = params.userid
-    var dt = dateTime.create();
-    var formatted = dt.format('d-m-Y H:M:S p');
-    var currentdate = dt.format('d-m-Y');
-    const user = await db.Attendace.findAndCountAll({ where: { userid } });
+    let userID = params.userID
+
+    let date = ("0" + date_ob.getDate()).slice(-2);
+
+    // current month
+    let month = ("0" + (date_ob.getMonth() + 1)).slice(-2);
+    
+    // current year
+    let year = date_ob.getFullYear();
+    
+    // current hours
+    let hours = date_ob.getHours() % 12 ;
+    
+    // current minutes
+    let minutes = date_ob.getMinutes();
+    
+    let ampm = date_ob.getHours() < 12 ? "AM" : "PM";
+    
+    // current seconds
+    let seconds = date_ob.getSeconds();
+
+    let currentDate = year + "-" + month + "-" + date + " " + hours + ":" + minutes + ":" + seconds + " " + ampm;
+    let currentdate =  year + "-" + month + "-" + date ;
+
+    const user = await db.Attendace.findAndCountAll({ where: { userID } });
     
   //check user Alreadylogin 
     for (let i = 0; i < user.count; i++) { 
         // console.log('messageLoad',timesplit)
         var timesplit = user.rows[i].inTime.split(' ')[0];
+        console.log(currentdate.toString )
+        console.log(timesplit.toString)
        
-        if (currentdate.toString === timesplit.toString){
+        if (currentdate === timesplit){
             if (user) throw 'already login';
            return user;
         }
       }
-    params.inTime =  formatted
+    // params.appliedLeave = 0
+    params.inTime =  currentDate
     params.inSatus = "1"
     await db.Attendace.create(params);
 
@@ -73,20 +98,40 @@ async function inTime(params) {
 //..out time outTime
 async function OutTime(params) {
    
-    let userid = params.userid
-    var dt = dateTime.create();
-    var formatted = dt.format('d-m-Y H:M:S p');
-    var currentdate = dt.format('d-m-Y');
-    var currenttime = dt.format('H:M:S');
-    const user = await db.Attendace.findAndCountAll({ where: { userid } });
+    let userID = params.userID
+  
+    let date = ("0" + date_ob.getDate()).slice(-2);
+
+    // current month
+    let month = ("0" + (date_ob.getMonth() + 1)).slice(-2);
+    
+    // current year
+    let year = date_ob.getFullYear();
+    
+    // current hours
+    let hours = date_ob.getHours() % 12 ;
+    
+    // current minutes
+    let minutes = date_ob.getMinutes();
+    
+    // current seconds
+    let seconds = date_ob.getSeconds();
+
+    let ampm = date_ob.getHours() < 12 ? "AM" : "PM";
+
+    let currentDate = year + "-" + month + "-" + date + " " + hours + ":" + minutes + ":" + seconds + " " + ampm;
+    
+    let currentdate =  year + "-" + month + "-" + date ;
+
+    const user = await db.Attendace.findAndCountAll({ where: { userID } });
     var inTimeStatus = ""
-    var presentTimeStamp = ""
+    var inTimeDate = ""
     //...check user Alreadylogin 
     
     for (let i = 0; i < user.count; i++) { 
         var inTimestm = user.rows[i].inTime.split(' ')[0];
         if (inTimestm == currentdate){
-            presentTimeStamp = user.rows[i].inTime;
+            inTimeDate = user.rows[i].inTime;
         }
         if (user.rows[i].outTime != null){
             var timesplit = user.rows[i].outTime.split(' ')[0];
@@ -97,39 +142,32 @@ async function OutTime(params) {
         }
     }
 
-    
-    
-    // let timesplit = user.rows[i].outTime.split(' ')[1];
-    // console.log('currentloadmessage',inTimeload)
-    // console.log('currenttimesplit',timesplit)
-
-    // var startTime = moment("12:16:59 am", 'hh:mm:ss');
-    // var endTime = moment("06:12:07 pm", 'hh:mm:ss a');
-    
-
-    const users = await getUserID(params.userid);
-    params.outTime =  formatted
+    const users = await getUserID(params.userID);
+    params.outTime =  currentDate
     users.update({
         params: params.outTime,
         params: params.outStatus =  "1"
-    },{ where: { userid: params.userid }});
+    },{ where: { userID: params.userID }});
 
-    var a = moment(inTimestm, "HH:mm:ss")
-    var b = moment(currenttime, "HH:mm:ss")
-    // var secondsDiff = b.diff(a, 'hours') // 12
-   
 
-    var secondsDiff = moment.utc(moment(b,"HH:mm:ss").diff(moment(a," HH:mm:ss"))).format("HH:mm:ss")
-    console.log('presentTimeStamp',secondsDiff)
+    console.log('outtimeDate',currentDate)
+    console.log('intimedate',inTimeDate)
+    var diff =(new Date(currentDate).getTime() - new Date(inTimeDate).getTime()) / 1000;
+    diff /= 60;
+    let matthdif =  Math.abs(Math.round(diff));
+    console.log('timediffrene',matthdif)
+    if (matthdif <= 480){
+        console.log('send mail to not complete 8 hours')
 
+    }
     // copy params to user and save
     Object.assign(users, params);
     await users.save();
     return omitHash(users.get());
 }
 
-async function getUserID(userid) {
-    const user = await db.Attendace.findOne({ where: { userid: userid } })
+async function getUserID(userID) {
+    const user = await db.Attendace.findOne({ where: { userID: userID } })
     // const user = await db.User.findByPk(userID);
     if (!user) throw ' Not found';
     return user;

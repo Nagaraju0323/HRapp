@@ -21,6 +21,8 @@ async function initialize() {
     db.Hr = require('../Hr/hr.model')(sequelize);
     db.Attendace = require('../Attendance/attendance.model')(sequelize);
     db.Otp = require('../Otp/otp.model')(sequelize);
+    db.Leave = require('../Leave/leave.model')(sequelize);
+    db.hrAttendance = require('../HRAttendaceTbl/hrAttendance.model')(sequelize);
     // db.Attendace.removeAttribute('id');
 
 

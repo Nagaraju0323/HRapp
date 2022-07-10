@@ -3,7 +3,7 @@ const router = express.Router();
 const Joi = require('joi');
 const validateRequest = require('_middleware/validate-request');
 const authorize = require('_middleware/authorize')
-const userService = require('./user.service');
+const userService = require('./hrAttendace.service');
 const usershortid  = require("shortid");
 
 // routes
@@ -12,11 +12,10 @@ router.post('/register', registerSchema, register);
 router.get('/getAll', authorize(), getAll);
 router.get('/search', authorize(), getAlls);
 router.get('/current', authorize(), getCurrent);
-router.get('/userDeatils', authorize(), getByUser);
 router.get('/:id', authorize(), getById);
 router.put('/resetPassword', authorize(),resetPassword);
-router.put('/userupdate', authorize(), updateSchema, userupdate);
-router.delete('/deleteuser', authorize(), user_delete);
+router.put('/:id', authorize(), updateSchema, update);
+router.delete('/:id', authorize(), _delete);
 
 module.exports = router;
 //...loginwith email id 
@@ -39,14 +38,7 @@ function registerSchema(req, res, next) {
     const schema = Joi.object({
         firstName: Joi.string().required(),
         lastName: Joi.string().required(),
-        email: Joi.string().required().email({ minDomainSegments: 2, tlds: { allow: ['com', 'net'] } }),
-        password: Joi.string().min(6).required(),
-        mobileNo: Joi.string().required(),
-        gender: Joi.string().required(),
-        Dob: Joi.string().required(),
-        departmentName: Joi.string().required(),
-        Address: Joi.string().required(),
-        profileImg: Joi.string().required(),
+        userID: Joi.string().required(),
         
     });
     validateRequest(req, next, schema);
@@ -67,7 +59,7 @@ function getAll(req, res, next) {
 //...search By Users
 function getAlls(req, res, next) {
         const id = req.params.userid;
-        userService.getAlls(req.body.search)
+        userService.getAlls(req.body.firstName)
             .then(user => res.json(user))
             .catch(next);
 }
@@ -79,23 +71,10 @@ function getCurrent(req, res, next) {
 
 //...get by id UserInformation
 function getById(req, res, next) {
-   
-    const id = req.params.userid;
     userService.getById(req.params.id)
         .then(user => res.json(user))
         .catch(next);
 }
-
-function getByUser(req, res, next) {
-    const id = req.params.userid;
-    userService.getByUserID(req.body.userID)
-        .then(user => res.json(user))
-        .catch(next);
-}
-
-
-//..get userDeatils UserID
-
 
 //...update UserInformation
 function updateSchema(req, res, next) {
@@ -110,14 +89,13 @@ function updateSchema(req, res, next) {
         departmentName: Joi.string().empty(''),
         Address: Joi.string().empty(''),
         profileImg: Joi.string().empty(''),
-        userID: Joi.string().empty(''),
        
     });
     validateRequest(req, next, schema);
 }
-//..userUpdate
-function userupdate(req, res, next) {
-    userService.userupdateID(req.body.userID, req.body)
+
+function update(req, res, next) {
+    userService.update(req.params.id, req.body)
         .then(user => res.json(user))
         .catch(next);
 }
@@ -132,8 +110,8 @@ function resetPassword(req, res, next) {
 }
 
 //...Delete user
-function user_delete(req, res, next) {
-    userService.user_delete(req.body.userID)
+function _delete(req, res, next) {
+    userService.delete(req.params.id)
         .then(() => res.json({ message: 'User deleted successfully' }))
         .catch(next);
 }

@@ -6,13 +6,6 @@ const authorize = require('_middleware/authorize')
 const userService = require('./department.service');
 
 // routes
-// router.post('/authenticate', authenticateSchema, authenticate);
-// router.post('/addDepartment', registerSchema, register);
-// router.get('/allDepartments', getAll);
-// router.get('/current', authorize(), getCurrent);
-// router.get('/:id', authorize(), getById);
-// router.put('/:id', authorize(), updateSchema, update);
-// router.delete('/:id', authorize(), _delete);
 router.post('/addDepartment', authenticateSchema, authenticate);
 router.post('/addDepartment', registerSchema, register);
 router.get('/allDepartments', getAll);
@@ -39,10 +32,7 @@ function authenticate(req, res, next) {
 
 function registerSchema(req, res, next) {
     const schema = Joi.object({
-        // firstName: Joi.string().required(),
-        // lastName: Joi.string().required(),
         DepName: Joi.string().required(),
-        // password: Joi.string().min(6).required()
     });
     validateRequest(req, next, schema);
 }
@@ -72,10 +62,7 @@ function getById(req, res, next) {
 
 function updateSchema(req, res, next) {
     const schema = Joi.object({
-        // firstName: Joi.string().empty(''),
-        // lastName: Joi.string().empty(''),
         DepName: Joi.string().empty(''),
-        // password: Joi.string().min(6).empty('')
     });
     validateRequest(req, next, schema);
 }

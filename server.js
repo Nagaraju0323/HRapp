@@ -20,6 +20,10 @@ app.use('/Attendace', require('./Attendance/attendance.controller'));
 
 app.use('/Otp', require('./Otp/otp.controller'));
 
+app.use('/Leave', require('./Leave/leave.controller'));
+
+app.use('/Leave', require('./HRAttendaceTbl/hrAttendace.controller'));
+
 
 
 // global error handler

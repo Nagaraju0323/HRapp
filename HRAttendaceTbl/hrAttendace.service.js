@@ -4,7 +4,7 @@ const bcrypt = require('bcryptjs');
 const db = require('_helpers/db');
 const { Sequelize, Op } = require("sequelize");
 const userServices  = require("shortid");
-const userService = require('./user.service');
+const userService = require('./hrAttendace.service');
 
 module.exports = {
     authenticate,
@@ -15,8 +15,7 @@ module.exports = {
     create,
     resetPassword,
     update,
-    userupdateID,
-    user_delete,
+    delete: _delete,
     
 };
 
@@ -37,11 +36,11 @@ async function getAll() {
     return await db.User.findAll();
 }
 //...search with UserInformation
-async function getAlls(search) {
+async function getAlls(firstName) {
     let data = [];
     const user = await db.User.findAll({
             where: Sequelize.where(Sequelize.fn("concat", Sequelize.col("firstName"), Sequelize.col("lastName")), {
-                [Op.like]: '%' + search + '%',
+                [Op.like]: '%' + firstName + '%',
 
             })
           });
@@ -63,32 +62,13 @@ async function getById(id) {
     return await getUser(id);
 }
 
-
 async function getByUserID(userID) {
-    console.log('this')
     return await getUserID(userID);
 }
-
-
 //...create user
 async function create(params) {
     // validate
-    if (await db.User.findOne({ where: { email: params.email } })) {
-        throw 'email "' + params.email + '" is already taken';
-    }
-
-    if (await db.User.findOne({ where: { mobileNo: params.mobileNo } })) {
-        throw 'mobileNo "' + params.mobileNo + '" is already taken';
-    }
-    // hash password
-    if (params.password) {
-        params.hash = await bcrypt.hash(params.password, 10);
-    }
-    // savepassword
-    var rand = Math.floor(Math.random() * 1000000);
-    var randStr = rand
-    params.userID = randStr
-
+  
     // save user
     await db.User.create(params);
 }
@@ -118,33 +98,6 @@ async function update(id, params) {
 
     return omitHash(user.get());
 }
-//..userupdateByUserid
-async function userupdateID(userID, params) {
-    const user = await getUserID(userID);
-
-    // validate
-    const emailChanged = params.email && user.email !== params.email;
-    if (emailChanged && await db.User.findOne({ where: { email: params.email } })) {
-        throw 'email "' + params.email + '" is already taken';
-    }
-   
-    const mobileNoChanged = params.mobileNo && user.mobileNo !== params.mobileNo;
-    if (mobileNoChanged && await db.User.findOne({ where: { mobileNo: params.mobileNo } })) {
-        throw 'mobileNo "' + params.mobileNo + '" is already taken';
-    }
-
-    // hash password if it was entered
-    if (params.password) {
-        params.hash = await bcrypt.hash(params.password, 10);
-    }
-
-    // copy params to user and save
-    Object.assign(user, params);
-    await user.save();
-
-    return omitHash(user.get());
-}
-
 
 //...reset Password userInfo
 async function resetPassword(userID, params) {
@@ -167,13 +120,17 @@ async function resetPassword(userID, params) {
     return omitHash(user.get());
 }
 
-async function user_delete(userID) {
-    const user = await getUserID(userID);
+
+async function _delete(id) {
+    const user = await getUser(id);
     await user.destroy();
 }
+
 // helper functions
 
 async function getUser(id) {
+
+    
     const user = await db.User.findByPk(id);
     if (!user) throw 'User not found';
     return user;
