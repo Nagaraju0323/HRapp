@@ -7,6 +7,8 @@ const { text } = require('body-parser');
 var moment = require('moment');
 const { param } = require('./attendance.controller');
 const date_ob = new Date();
+const { Sequelize, Op } = require("sequelize");
+let data = [];
 
 module.exports = {
     authenticate,
@@ -14,7 +16,11 @@ module.exports = {
     getAllbyId,
     getById,
     inTime,
+    leaveAttendance,
     OutTime,
+    getbyDate,
+    getbyDiffDate,
+    updateLeaveAtd,
     update,
     delete: _delete
 };
@@ -42,6 +48,63 @@ async function getAllbyId(userID) {
         status : 0
      }
     return await data
+}
+
+async function getbyDate(userID,params) {
+    let currentdate = params.date 
+    console.log('dateformat',currentdate)
+    const user = await db.Attendace.findAndCountAll({ where: { userID:userID,startDate:currentdate } });
+    if (user.count == 0){
+        data = {
+            "error":'Search Items Notfound',
+            status : 400
+         }
+    }
+    if (user.count != 0){
+         data = {
+            count: user.count,
+            data: user.rows,
+            status : 200
+         }
+    }
+    
+    return await data
+    
+}
+
+async function getbyDiffDate(userID,params) {
+    let startdate = params.startDate 
+    let endDate = params.endDate
+
+    const user = await db.Attendace.findAll({
+        where: {
+            userID:userID,
+            [Op.or]: [{
+                startDate: {
+                    [Op.between]: [startdate, endDate]
+                }
+            }, {
+                startDate: {
+                    [Op.between]: [startdate, endDate]
+                }
+            }]
+        },
+    })
+    
+    if (user.count == 0){
+        data = {
+            "error":'Search Items Notfound',
+            status : 400
+         }
+    }
+    if (user.count !=0){
+         data = {
+            data: user,
+            status : 0
+         }
+    }
+    return await data
+    
 }
 
 async function getById(id) {
@@ -80,9 +143,6 @@ async function inTime(params) {
     for (let i = 0; i < user.count; i++) { 
         // console.log('messageLoad',timesplit)
         var timesplit = user.rows[i].inTime.split(' ')[0];
-        console.log(currentdate.toString )
-        console.log(timesplit.toString)
-       
         if (currentdate === timesplit){
             if (user) throw 'already login';
            return user;
@@ -90,6 +150,7 @@ async function inTime(params) {
       }
     // params.appliedLeave = 0
     params.inTime =  currentDate
+    params.startDate = currentdate 
     params.inSatus = "1"
     await db.Attendace.create(params);
 
@@ -124,7 +185,7 @@ async function OutTime(params) {
     let currentdate =  year + "-" + month + "-" + date ;
 
     const user = await db.Attendace.findAndCountAll({ where: { userID } });
-    var inTimeStatus = ""
+    
     var inTimeDate = ""
     //...check user Alreadylogin 
     
@@ -142,20 +203,18 @@ async function OutTime(params) {
         }
     }
 
-    const users = await getUserID(params.userID);
+    const users = await getUserIDDate(params.userID,inTimeDate);
     params.outTime =  currentDate
+    params.endDate =  currentdate
     users.update({
         params: params.outTime,
+        params: params.endDate,
         params: params.outStatus =  "1"
     },{ where: { userID: params.userID }});
 
-
-    console.log('outtimeDate',currentDate)
-    console.log('intimedate',inTimeDate)
     var diff =(new Date(currentDate).getTime() - new Date(inTimeDate).getTime()) / 1000;
     diff /= 60;
     let matthdif =  Math.abs(Math.round(diff));
-    console.log('timediffrene',matthdif)
     if (matthdif <= 480){
         console.log('send mail to not complete 8 hours')
 
@@ -166,17 +225,32 @@ async function OutTime(params) {
     return omitHash(users.get());
 }
 
+
+//leave attenance 
+async function leaveAttendance(params) {
+    let obj = {};
+    obj.userID = params.userID
+    obj.startDate = params.startDate
+    obj.endDate = params.startDate
+    obj.leaveType = params.leaveType
+    await db.Attendace.create(obj);
+
+}
+
 async function getUserID(userID) {
     const user = await db.Attendace.findOne({ where: { userID: userID } })
-    // const user = await db.User.findByPk(userID);
     if (!user) throw ' Not found';
     return user;
 }
 
 //..absent 
+async function getUserIDDate(userID,params) {
 
-
-
+    let currentdate = params
+    const user = await db.Attendace.findOne({ where: { userID: userID,inTime:currentdate } })
+    if (!user) throw ' Not found';
+    return user;
+}
 
 async function update(id, params) {
     const user = await getUser(id);
@@ -203,6 +277,42 @@ async function _delete(id) {
     const user = await getUser(id);
     await user.destroy();
 }
+
+//update the leve attendance 
+async function updateLeaveAtd(params) {
+  
+   let userID = params.userID;
+   let startDate = params.startDate;
+   let leaveType = params.leaveType
+   let leaveStatus = params.leaveStatus
+   let obj = {};
+   obj.leaveStatus = leaveStatus ?? {}
+   
+    const user = await db.Attendace.findOne({ where: { userID: userID,startDate:startDate,leaveType:leaveType} })
+
+    // user.update({
+    //     params: params.leaveStatus
+    // },{ where: { userID: userID,startDate:startDate,leaveType:leaveType }});
+    
+    // copy params to user and save
+    console.log('objectmessage',obj);
+    Object.assign(user, obj ?? {});
+    await user.save();
+    
+    return omitHash(user.get());
+   
+
+    // const users = await db.Attendace.findAndCountAll({ where: { useriD:useriD,startDate:startDate,startDate:endDate,leaveType:leaveType} });
+
+    // params.leaveStatus = 3
+    // // console.log('userData',users.rows)
+    // // copy params to user and save
+    // Object.assign(user, params);
+    // await user.save();
+    // return omitHash(user.get());
+}
+
+
 
 // helper functions
 

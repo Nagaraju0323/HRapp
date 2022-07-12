@@ -6,7 +6,7 @@ const authorize = require('_middleware/authorize')
 const userService = require('./department.service');
 
 // routes
-router.post('/addDepartment', authenticateSchema, authenticate);
+// router.post('/addDepartment', authenticateSchema, authenticate);
 router.post('/addDepartment', registerSchema, register);
 router.get('/allDepartments', getAll);
 router.get('/current', getCurrent);

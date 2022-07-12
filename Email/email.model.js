@@ -1,15 +1,11 @@
 const { DataTypes } = require('sequelize');
-const userService = require('./hrAttendace.service');
+const userService = require('./email.service');
 
 module.exports = model;
 
 function model(sequelize) {
     const attributes = {
-        firstName: { type: DataTypes.STRING, allowNull: false },
-        lastName: { type: DataTypes.STRING, allowNull: false },
-        departmentName: { type: DataTypes.STRING, allowNull:false},
-        userID: { type: DataTypes.STRING, allowNull:false},
-
+        senderEmail: { type: DataTypes.STRING, allowNull: true },
     };
 
     const options = {
@@ -23,5 +19,5 @@ function model(sequelize) {
         }
     };
 
-    return sequelize.define('HRAttendaceTbl', attributes, options);
+    return sequelize.define('Email', attributes, options);
 }

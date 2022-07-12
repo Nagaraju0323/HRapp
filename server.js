@@ -22,7 +22,8 @@ app.use('/Otp', require('./Otp/otp.controller'));
 
 app.use('/Leave', require('./Leave/leave.controller'));
 
-app.use('/Leave', require('./HRAttendaceTbl/hrAttendace.controller'));
+
+app.use('/Email', require('./Email/email.controller'));
 
 
 

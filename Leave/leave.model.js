@@ -7,12 +7,12 @@ function model(sequelize) {
     const attributes = {
         senderEmail: { type: DataTypes.STRING, allowNull: true },
         sendTo: { type: DataTypes.JSON,allowNull: true},
-        leveType: { type: DataTypes.INTEGER , allowNull: true },
+        leaveType: { type: DataTypes.INTEGER , allowNull: true },
         titleType: { type: DataTypes.STRING, allowNull: true },
         descriptionType: { type: DataTypes.STRING, allowNull: true },
         duationDates: { type: DataTypes.JSON, allowNull: true },
-        statDate: { type: DataTypes.DATE, allowNull: true },
-        endDate: { type: DataTypes.DATE, allowNull: true },
+        startDate: { type: DataTypes.STRING, allowNull: true },
+        endDate: { type: DataTypes.STRING, allowNull: true },
         userID: { type: DataTypes.STRING, allowNull:true},
         leaveStatus: { type: DataTypes.INTEGER, allowNull:true},
         

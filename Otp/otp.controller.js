@@ -24,14 +24,15 @@ function registerSchema(req, res, next) {
 }
 
 function registerMobile(req, res, next) {
-    userService.create(req.body)
+    userService.sendOtpMobile(req.body)
         .then(() => res.json({ message: 'Registration successful' }))
         .catch(next);
 }
 
-function registerEamil(req, res, next) {
-    userService.sendOtpMobile(req.body)
-        .then(() => res.json({ message: 'Registration successful' }))
+function registerEamil(_req, res, next) {
+    // userService.create(_req.body)
+    userService.sendOtpMobile(_req.body)
+        .then((message) => res.json({ message: message }))
         .catch(next);
 }
 

@@ -7,36 +7,25 @@ const userService = require('./attendance.service');
 
 // routes
 // router.post('/authenticate', authenticateSchema, authenticate);
-router.post('/empAttendanceIn',  authorize(),registerSchema, employeeInTime);
+router.post('/empAttendanceIn',  authorize(),registerSchemaIn, employeeInTime);
 router.post('/empAttendanceOut',  authorize(),registerSchemaOut, employeeOutTime);
 //..leaveapply 
-// router.post('/empApplyLeave',  authorize(),registerapplyLeave, employeeApplyLeave);
+
 router.get('/getAllAttendance', authorize(), getAll);
 router.get('/getAllbyId', authorize(), getAllAtd);
-router.get('/getCurrentDate', authorize(), getAllAtd);
-router.get('/currentAttendance', authorize(), getCurrent);
+router.get('/getCurrentDate', authorize(), getbyCurrentDate);
+router.get('/getDiffDate', authorize(), getbyDifftDate);
 router.get('/:userid', authorize(), getById);
-router.put('/:id', authorize(), updateSchema, update);
+router.put('/updateAttendance', authorize(), updateSchema, update);
+router.put('/:id', authorize(), updateSchema, attendanceupdate);
 router.delete('/:id', authorize(), _delete);
+let data = [];
 
 
 module.exports = router;
 
-function authenticateSchema(req, res, next) {
-    const schema = Joi.object({
-        email: Joi.string().required(),
-        password: Joi.string().required()
-    });
-    validateRequest(req, next, schema);
-}
 
-function authenticate(req, res, next) {
-    userService.authenticate(req.body)
-        .then(user => res.json(user))
-        .catch(next);
-}
-
-function registerSchema(req, res, next) {
+function registerSchemaIn(req, res, next) {
     const schema = Joi.object({
         presentDay: Joi.string().required(),
         userID: Joi.number().required(),
@@ -45,15 +34,6 @@ function registerSchema(req, res, next) {
     validateRequest(req, next, schema);
 }
 //..Apply Leave
-function registerapplyLeave(req, res, next) {
-    const schema = Joi.object({
-        presentDay: Joi.string().required(),
-        userID: Joi.number().required(),
-       
-    });
-    validateRequest(req, next, schema);
-}
-
 
 function registerSchemaOut(req, res, next) {
     const schema = Joi.object({
@@ -68,7 +48,11 @@ function registerSchemaOut(req, res, next) {
 //..employee Intime 
 function employeeInTime(req, res, next) {
     userService.inTime(req.body)
-        .then(() => res.json({ message: 'successful In',status:0}))
+        .then(() => res.json({ 
+             message: 'successful In',
+             status:200
+            }
+            ))
         .catch(next);
 }
 //..employee Intime 
@@ -93,9 +77,20 @@ function getAllAtd(req, res, next) {
         .catch(next);
 }
 
-function getCurrent(req, res, next) {
-    res.json(req.user);
+function getbyCurrentDate(req, res, next) {
+    const id = req.params.userID;
+    userService.getbyDate(req.body.userID,req.body)
+        .then(user => res.json(user))
+        .catch(next);
 }
+
+function getbyDifftDate(req, res, next) {
+    const id = req.params.userID;
+    userService.getbyDiffDate(req.body.userID,req.body)
+        .then(user => res.json(user))
+        .catch(next);
+}
+
 
 function getById(req, res, next) {
     const id = req.params.userID;
@@ -112,6 +107,15 @@ function updateSchema(req, res, next) {
     });
     validateRequest(req, next, schema);
 }
+
+//..updateAttendance
+
+function attendanceupdate(req, res, next) {
+    userService.update(req.params.id, req.body)
+        .then(user => res.json(user))
+        .catch(next);
+}
+
 
 function update(req, res, next) {
     userService.update(req.params.id, req.body)
