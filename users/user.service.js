@@ -5,9 +5,11 @@ const db = require('_helpers/db');
 const { Sequelize, Op } = require("sequelize");
 const userServices  = require("shortid");
 const userService = require('./user.service');
+const otpService = require('../Otp/otp.service');
 
 module.exports = {
     authenticate,
+    authenticatetoMobile,
     getAll,
     getAlls,
     getById,
@@ -17,6 +19,7 @@ module.exports = {
     update,
     userupdateID,
     user_delete,
+    forgotpassword,
     
 };
 
@@ -32,6 +35,22 @@ async function authenticate({ email, password }) {
     const token = jwt.sign({ sub: user.id }, config.secret, { expiresIn: '7d' });
     return { ...omitHash(user.get()), token };
 }
+
+//...user Login mobile
+async function authenticatetoMobile({ mobileNo, password }) {
+  
+    const user = await db.User.scope('withHash').findOne({ where: { mobileNo } });
+
+    if (!user || !(await bcrypt.compare(password, user.hash)))
+        throw 'email or password is incorrect';
+
+    // authentication successful
+    const token = jwt.sign({ sub: user.id }, config.secret, { expiresIn: '7d' });
+    return { ...omitHash(user.get()), token };
+}
+
+
+
 //...GetAll UserInformation
 async function getAll() {
     return await db.User.findAll();
@@ -151,9 +170,7 @@ async function resetPassword(userID, params) {
     const user = await getUserID(userID);
     // hash password if it was entered
     if (params.password) {
-        console.log(params.password)
         params.hash = await bcrypt.hash(params.password, 10);
-        
     }
 
    user.update({
@@ -191,3 +208,14 @@ function omitHash(user) {
     return userWithoutHash;
 }
 
+//update Otp 
+
+async function forgotpassword(param) {
+    let objc = {};
+    const user = await db.User.findOne({ where: { email: param.email } })
+    objc.email = user.email
+    await otpService.forgotpasswordtoEmail(objc)
+    // const user = await db.User.findByPk(userID);
+    if (!user) throw 'User not found';
+    return user;
+}

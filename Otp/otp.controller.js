@@ -7,9 +7,11 @@ const userService = require('./otp.service');
 
 
 // routes
+
 router.post('/sendOtpMobile', registerMobile);
 router.post('/sendOtpEmail', registerEamil);
-router.post('/validationOtp',validationOtp);
+router.post('/validateOtp',validationOtp);
+router.post('/resentOtp',resentOtptoemail);
 
 module.exports = router;
 //...loginwith email id 
@@ -30,8 +32,13 @@ function registerMobile(req, res, next) {
 }
 
 function registerEamil(_req, res, next) {
-    // userService.create(_req.body)
-    userService.sendOtpMobile(_req.body)
+    userService.sendOtpToEmail(_req.body)
+        .then((message) => res.json({ message: message }))
+        .catch(next);
+}
+//resent Otp
+function resentOtptoemail(_req, res, next) {
+    userService.resendOtpToEmail(_req.body)
         .then((message) => res.json({ message: message }))
         .catch(next);
 }

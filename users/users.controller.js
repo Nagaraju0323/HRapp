@@ -5,9 +5,11 @@ const validateRequest = require('_middleware/validate-request');
 const authorize = require('_middleware/authorize')
 const userService = require('./user.service');
 const usershortid  = require("shortid");
+const otpService = require('../Otp/otp.service');
 
 // routes
-router.post('/login', authenticateSchema, authenticate);
+router.post('/logintoEmail', authenticateSchema, authenticate);
+router.post('/logintoMobile', authenticateSchemamobile, authenticatemobile);
 router.post('/register', registerSchema, register);
 router.get('/getAll', authorize(), getAll);
 router.get('/search', authorize(), getAlls);
@@ -17,6 +19,7 @@ router.get('/:id', authorize(), getById);
 router.put('/resetPassword', authorize(),resetPassword);
 router.put('/userupdate', authorize(), updateSchema, userupdate);
 router.delete('/deleteuser', authorize(), user_delete);
+router.post('/forgotpassword', forgotPassword);
 
 module.exports = router;
 //...loginwith email id 
@@ -33,6 +36,21 @@ function authenticate(req, res, next) {
         .then(user => res.json(user))
         .catch(next);
 }
+
+function authenticateSchemamobile(req, res, next) {
+    const schema = Joi.object({
+        mobileNo: Joi.string().required(),
+        password: Joi.string().required()
+    });
+    validateRequest(req, next, schema);
+}
+
+function authenticatemobile(req, res, next) {
+    userService.authenticatetoMobile(req.body)
+        .then(user => res.json(user))
+        .catch(next);
+}
+
 
 //...Registration 
 function registerSchema(req, res, next) {
@@ -135,6 +153,14 @@ function resetPassword(req, res, next) {
 function user_delete(req, res, next) {
     userService.user_delete(req.body.userID)
         .then(() => res.json({ message: 'User deleted successfully' }))
+        .catch(next);
+}
+
+//...Delete user
+function forgotPassword(req, res, next) {
+
+    userService.forgotpassword(req.body)
+        .then(() => res.json({ message: 'send link email successfully' }))
         .catch(next);
 }
 

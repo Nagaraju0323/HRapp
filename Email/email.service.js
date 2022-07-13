@@ -34,7 +34,7 @@ async function authenticate({ email, password }) {
 }
 //...GetAll UserInformation
 async function getAll() {
-    let user = db.Leave.findAll()
+    let user = db.Email.findAll()
      return await user;
 }
 
@@ -57,12 +57,16 @@ async function getAllbyId(userID) {
     return await data
 }
 
-
 //...create user
 async function create(params) {
- 
-    params.leaveStatus = 0 
-    await db.Leave.create(params);
+  let objc = {};
+  objc.senderEmail = params
+  console.log(params)
+    if (await db.Email.findOne({ where: { senderEmail: params } })) {
+        throw 'email "' + params.senderEmail + '" is already taken';
+    }
+
+    await db.Email.create(objc);
 }
 
 

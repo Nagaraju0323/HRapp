@@ -7,6 +7,7 @@ const userServices  = require("shortid");
 const userService = require('./leave.service');
 const attendanceService = require('../Attendance/attendance.service');
 const otpService = require('../Otp/otp.service');
+const emailService = require('../Email/email.service');
 const { BlockDomain } = require('sib-api-v3-sdk');
 const { send } = require('express/lib/response');
 let data = [];
@@ -101,6 +102,7 @@ async function create(params) {
        objc.senderEmail = params.senderEmail;
        
       await otpService.sendLeaveToEmail(objc);
+      await emailService.create(toEmail);
     }
 
 //..update the leave after leave applyed 

@@ -6,6 +6,8 @@ var dateTime = require('node-datetime');
 const { text } = require('body-parser');
 var moment = require('moment');
 const { param } = require('./attendance.controller');
+const sentmailService = require('../Otp/otp.service');
+const userservice = require('../users/user.service');
 const date_ob = new Date();
 const { Sequelize, Op } = require("sequelize");
 let data = [];
@@ -187,6 +189,7 @@ async function OutTime(params) {
     const user = await db.Attendace.findAndCountAll({ where: { userID } });
     
     var inTimeDate = ""
+    var objc = {};
     //...check user Alreadylogin 
     
     for (let i = 0; i < user.count; i++) { 
@@ -216,7 +219,17 @@ async function OutTime(params) {
     diff /= 60;
     let matthdif =  Math.abs(Math.round(diff));
     if (matthdif <= 480){
+        //send mail to particular person 
         console.log('send mail to not complete 8 hours')
+ 
+       const userinfo = await db.User.findOne({ where: { userID:userID}});
+      
+       console.log('useremailID',userinfo.email)
+
+       objc.sendTo = userinfo.email
+       objc.titleType = 'REMINDER OF TIME LINE'
+       objc.descriptionType = 'YOUR NOT COMPLETED THE 8 HOUTS SO GENTLE REMINDER TO FINISH NEXT TIME',
+       await sentmailService.sendReminderAtd(objc);
 
     }
     // copy params to user and save
@@ -290,29 +303,12 @@ async function updateLeaveAtd(params) {
    
     const user = await db.Attendace.findOne({ where: { userID: userID,startDate:startDate,leaveType:leaveType} })
 
-    // user.update({
-    //     params: params.leaveStatus
-    // },{ where: { userID: userID,startDate:startDate,leaveType:leaveType }});
-    
-    // copy params to user and save
-    console.log('objectmessage',obj);
     Object.assign(user, obj ?? {});
     await user.save();
-    
     return omitHash(user.get());
    
-
-    // const users = await db.Attendace.findAndCountAll({ where: { useriD:useriD,startDate:startDate,startDate:endDate,leaveType:leaveType} });
-
-    // params.leaveStatus = 3
-    // // console.log('userData',users.rows)
-    // // copy params to user and save
-    // Object.assign(user, params);
-    // await user.save();
-    // return omitHash(user.get());
 }
-
-
+//enter otp 
 
 // helper functions
 
