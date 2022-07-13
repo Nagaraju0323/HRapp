@@ -3,8 +3,7 @@ const router = express.Router();
 const Joi = require('joi');
 const validateRequest = require('_middleware/validate-request');
 const authorize = require('_middleware/authorize')
-const userService = require('./otp.service');
-
+// const userService = require('./otp.service');
 
 // routes
 

@@ -25,6 +25,7 @@ app.use('/Leave', require('./Leave/leave.controller'));
 
 app.use('/Email', require('./Email/email.controller'));
 
+app.use('/Event', require('./Event/event.controller'));
 
 
 // global error handler

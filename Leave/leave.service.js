@@ -6,10 +6,11 @@ const { Sequelize, Op } = require("sequelize");
 const userServices  = require("shortid");
 const userService = require('./leave.service');
 const attendanceService = require('../Attendance/attendance.service');
-const otpService = require('../Otp/otp.service');
+// const otpService = require('../Otp/otp.service');
 const emailService = require('../Email/email.service');
 const { BlockDomain } = require('sib-api-v3-sdk');
 const { send } = require('express/lib/response');
+const nodemailer = require("nodemailer");
 let data = [];
 module.exports = {
     authenticate,
@@ -22,6 +23,7 @@ module.exports = {
     getUserID,
     getbyDiffDate,
     delete: _delete,
+    getsendLeave,
     deleteAll: _deleteAll,
 };
 
@@ -100,9 +102,9 @@ async function create(params) {
        objc.endDate = params.endDate;
        objc.leaveType = params.leaveType;
        objc.senderEmail = params.senderEmail;
-       
-      await otpService.sendLeaveToEmail(objc);
-      await emailService.create(toEmail);
+       getsendLeave(objc)
+    //   await otpService.sendLeaveToEmail(objc);
+    //   await emailService.create(toEmail);
     }
 
 //..update the leave after leave applyed 
@@ -293,3 +295,43 @@ function omitHash(user) {
     return userWithoutHash;
 }
 
+
+async function getsendLeave(params) {
+    // const user = await db.Leave.findOne({ where: { userID: userID } })
+    // if (!user) throw 'User not found';
+    // return user;
+
+    let testAcc = {
+        user: "nagaraju.kankanala@sevenchats.com",
+        pass: "Omsairam@12345",
+      };
+      let transporter = nodemailer.createTransport({
+        name:"http://webmail.sevenchats.com",
+        host: "mail.sevenchats.com",
+        port: 465,
+        secure: true, // true for 465, false for other ports
+        auth: {
+          user: testAcc.user,
+          pass: testAcc.pass,
+        },
+        tls: {
+          rejectUnauthorized: false,
+        },
+      });
+      await transporter
+        .sendMail({
+          from: params.senderEmail,
+          to: params.sendTo,
+          subject: params.titleType,
+          text: params.descriptionType,
+        })
+        .then((result) => {
+          console.log(result.messageId);
+          console.log(result.response);
+        })
+        .catch((err) => {
+          console.error(err.message);
+        });
+    
+
+}

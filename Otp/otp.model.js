@@ -1,5 +1,5 @@
 const { DataTypes } = require('sequelize');
-const userService = require('./otp.service');
+// const userService = require('./otp.service');
 
 module.exports = model;
 

@@ -23,6 +23,7 @@ async function initialize() {
     db.Otp = require('../Otp/otp.model')(sequelize);
     db.Leave = require('../Leave/leave.model')(sequelize);
     db.Email = require('../Email/email.model')(sequelize);
+    db.Event = require('../Event/event.model')(sequelize);
     // db.Attendace.removeAttribute('id');
 
 

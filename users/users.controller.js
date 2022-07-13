@@ -5,7 +5,7 @@ const validateRequest = require('_middleware/validate-request');
 const authorize = require('_middleware/authorize')
 const userService = require('./user.service');
 const usershortid  = require("shortid");
-const otpService = require('../Otp/otp.service');
+
 
 // routes
 router.post('/logintoEmail', authenticateSchema, authenticate);
@@ -20,6 +20,9 @@ router.put('/resetPassword', authorize(),resetPassword);
 router.put('/userupdate', authorize(), updateSchema, userupdate);
 router.delete('/deleteuser', authorize(), user_delete);
 router.post('/forgotpassword', forgotPassword);
+router.post('/sentOtptoemail', sentOtptoemail);
+router.post('/resentOtptoemail', resentOtptoemail);
+router.post('/validateOtp', validateOtp);
 
 module.exports = router;
 //...loginwith email id 
@@ -164,3 +167,23 @@ function forgotPassword(req, res, next) {
         .catch(next);
 }
 
+function sentOtptoemail(req, res, next) {
+
+    userService.forgotpassword(req.body)
+        .then(() => res.json({ message: 'send link email successfully' }))
+        .catch(next);
+}
+
+function resentOtptoemail(req, res, next) {
+
+    userService.forgotpassword(req.body)
+        .then(() => res.json({ message: 'send link email successfully' }))
+        .catch(next);
+}
+
+function validateOtp(req, res, next) {
+
+    userService.validOtp(req.body)
+        .then(() => res.json({ message: 'Otp successful'}))
+        .catch(next);
+}

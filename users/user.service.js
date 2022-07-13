@@ -5,7 +5,15 @@ const db = require('_helpers/db');
 const { Sequelize, Op } = require("sequelize");
 const userServices  = require("shortid");
 const userService = require('./user.service');
-const otpService = require('../Otp/otp.service');
+const sgMail = require('@sendgrid/mail');
+const apiKey =
+    process.env.SENDGRID_API_KEY ||
+    "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";
+const apikeySms = "https://http-api.d7networks.com/send"
+
+sgMail.setApiKey(apiKey);
+
+// const otpService = require('../Otp/otp.service');
 
 module.exports = {
     authenticate,
@@ -20,6 +28,7 @@ module.exports = {
     userupdateID,
     user_delete,
     forgotpassword,
+    validOtp
     
 };
 
@@ -211,11 +220,60 @@ function omitHash(user) {
 //update Otp 
 
 async function forgotpassword(param) {
-    let objc = {};
+    var objc = {}
     const user = await db.User.findOne({ where: { email: param.email } })
     objc.email = user.email
-    await otpService.forgotpasswordtoEmail(objc)
-    // const user = await db.User.findByPk(userID);
-    if (!user) throw 'User not found';
+    // await forgotpasswordtoEmail(objc)
+
+    let toMail = user.email
+    console.log('email',toMail)
+    var rand = Math.floor(Math.random() * 1000000);
+    var randStr = rand
+    
+    
+    let randomnumber = 'ConfimrationCode' + '\n' + randStr
+   
+    objc.otp = randStr;
+    objc.email = toMail;
+  
+    var msg = {
+          to: toMail,
+          from: 'Sevenchats.blr@gmail.com',
+          subject: 'code',
+          text: 'conformation Code',
+          html: randomnumber,
+        };
+  
+        sgMail
+          .send(msg)
+          .then((result) => {
+            console.log('sg mail res')
+            console.log(result)
+        
+            return 'Success';
+          })
+          .catch((error) => {
+            console.trace('catch of sgmail')
+            console.error(error);
+            //throw new Error(error.message);
+          });
+  
+         //delete the existed otps 
+         const users = await db.Otp.findOne({ where: { email:param.email}})
+         if (!users) {
+            await db.Otp.create(objc);
+         }else {
+            await users.destroy();
+            await db.Otp.create(objc);
+         }
+   
+    // // // const user = await db.User.findByPk(userID);
+    // if (!user) throw 'User not found';
+    // return user;
+}
+
+async function validOtp(param) {
+    const user = await db.Otp.findOne({ where: { email:param.email}})
+    if (param.otp != user.otp) throw 'Otp Does not Match';
     return user;
 }

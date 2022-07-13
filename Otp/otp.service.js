@@ -8,7 +8,7 @@ const { Sequelize, Op } = require("sequelize");
 const userService = require('./otp.service');
 const sgMail = require('@sendgrid/mail');
 const { response } = require('express');
-const attendanceService = require('../users/user.service');
+// const attendanceService = require('../users/user.service');
 
 const apiKey =
     process.env.SENDGRID_API_KEY ||
@@ -21,10 +21,9 @@ module.exports = {
     sendOtpToEmail,
     validOtp,
     sendOtpMobile,
-    sendLeaveToEmail,
     resendOtpToEmail,
-    sendReminderAtd,
-    forgotpasswordtoEmail
+   
+    // forgotpasswordtoEmail
 };
 
 //...create user
@@ -97,7 +96,6 @@ async function sendOtpMobile(params) {
 
 //recvied opt for 
 
-  
 }
 
 
@@ -213,44 +211,3 @@ async function sendLeaveToEmail(params) {
 sendLeaveToEmail().catch(console.error);
 
 
-async function forgotpasswordtoEmail(params) {
-
-  let toMail = params.email
-  var rand = Math.floor(Math.random() * 1000000);
-  var randStr = rand
-  var objc = {}
-  
-  let randomnumber = 'ConfimrationCode' + '\n' + randStr
- 
-  objc.otp = randStr;
-  objc.email = toMail;
-
-  var msg = {
-        to: toMail,
-        from: 'Sevenchats.blr@gmail.com',
-        subject: 'code',
-        text: 'conformation Code',
-        html: randomnumber,
-      };
-
-      sgMail
-        .send(msg)
-        .then((result) => {
-          console.log('sg mail res')
-          console.log(result)
-      
-          return 'Success';
-        })
-        .catch((error) => {
-          console.trace('catch of sgmail')
-          console.error(error);
-          //throw new Error(error.message);
-        });
-
-       //delete the existed otps 
-       const user = await db.Otp.findOne({ where: { email:params.email}})
-       await user.destroy();
-       await db.Otp.create(objc);
-
-
-}

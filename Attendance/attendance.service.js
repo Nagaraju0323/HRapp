@@ -6,11 +6,19 @@ var dateTime = require('node-datetime');
 const { text } = require('body-parser');
 var moment = require('moment');
 const { param } = require('./attendance.controller');
-const sentmailService = require('../Otp/otp.service');
+// const sentmailService = require('../Otp/otp.service');
 const userservice = require('../users/user.service');
 const date_ob = new Date();
 const { Sequelize, Op } = require("sequelize");
+const sgMail = require('@sendgrid/mail');
 let data = [];
+
+const apiKey =
+    process.env.SENDGRID_API_KEY ||
+    "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";
+const apikeySms = "https://http-api.d7networks.com/send"
+
+sgMail.setApiKey(apiKey);
 
 module.exports = {
     authenticate,
@@ -24,6 +32,7 @@ module.exports = {
     getbyDiffDate,
     updateLeaveAtd,
     update,
+    getreminderById,
     delete: _delete
 };
 
@@ -229,7 +238,8 @@ async function OutTime(params) {
        objc.sendTo = userinfo.email
        objc.titleType = 'REMINDER OF TIME LINE'
        objc.descriptionType = 'YOUR NOT COMPLETED THE 8 HOUTS SO GENTLE REMINDER TO FINISH NEXT TIME',
-       await sentmailService.sendReminderAtd(objc);
+    //    await sentmailService.sendReminderAtd(objc);
+        getreminderById(objc)
 
     }
     // copy params to user and save
@@ -321,4 +331,43 @@ async function getUser(id) {
 function omitHash(user) {
     const { hash, ...userWithoutHash } = user;
     return userWithoutHash;
+}
+
+async function getreminderById(params) {
+    console.log('email',params.to)
+    let toMail = params.sendTo
+    var rand = Math.floor(Math.random() * 1000000);
+    var randStr = rand
+    var objc = {}
+    
+    let randomnumber = 'ConfimrationCode' + '\n' + randStr
+   
+    objc.otp = randStr;
+    objc.email = toMail;
+  
+     
+      var msg = {
+          to: toMail,
+          from: 'Sevenchats.blr@gmail.com',
+          subject: 'REMINDER OF TIME LINE',
+          text: 'conformation Code',
+          html: 'YOUR NOT COMPLETED THE 8 HOUTS SO GENTLE REMINDER TO FINISH NEXT TIME',
+        };
+  
+        sgMail
+          .send(msg)
+          .then((result) => {
+            console.log('sg mail res')
+            console.log(result)
+        
+            return 'Success';
+          })
+          .catch((error) => {
+            console.trace('catch of sgmail')
+            console.error(error);
+            //throw new Error(error.message);
+          });
+  
+        await db.Otp.create(objc); 
+    
 }
