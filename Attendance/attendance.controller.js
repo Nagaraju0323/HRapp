@@ -19,8 +19,9 @@ router.get('/:userid', authorize(), getById);
 router.put('/updateAttendance', authorize(), updateSchema, update);
 router.put('/:id', authorize(), updateSchema, attendanceupdate);
 router.delete('/:id', authorize(), _delete);
-let data = [];
+router.post('/calculateAttd', authorize(), calculateAttd);
 
+let data = [];
 
 module.exports = router;
 
@@ -126,5 +127,13 @@ function update(req, res, next) {
 function _delete(req, res, next) {
     userService.delete(req.params.id)
         .then(() => res.json({ message: 'Attendce deleted successfully' }))
+        .catch(next);
+}
+
+
+
+function calculateAttd(req, res, next) {
+    userService.caluclateAtd(req.body)
+        .then(user => res.json(user))
         .catch(next);
 }

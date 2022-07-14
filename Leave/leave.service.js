@@ -83,14 +83,63 @@ async function create(params) {
             return user;
             }
         }
-
-    params.leaveStatus = 0 
-    await db.Leave.create(params);
-
-    //..send email to users  
+    //udpate the attendance 
+    var listDate = [];
+    let newArray = [];
+    var obj = {}
+    var startDate =params.startDate;
+    var endDate = params.endDate;
+    var dateMove = new Date(startDate);
+    var strDate = startDate;
     
+    while (strDate < endDate){
+      var strDate = dateMove.toISOString().slice(0,10);
+      listDate.push(strDate);
+      dateMove.setDate(dateMove.getDate()+1);
+    };
+    for (let i = 0; i < listDate.length; i++) { 
+        var startDate = listDate[i]
+
+        obj.userID = params.userID
+        obj.startDate = startDate
+        obj.leaveType = params.leaveType
+
+
+     var startDate = listDate[i]
+        var givenDate = new Date(startDate);
+        var currentDay = givenDate.getDay();
+        var dateIsInWeekend = (currentDay === 6) || (currentDay === 0);
+        if(dateIsInWeekend==true){
+
+            obj.holidayStatus  = 1
+            await attendanceService.leaveAttendance(obj);
+           
+        } else {
+          let status = 0
+           let users = await db.Holiday.findAll()
+           for (let i = 0; i < users.length; i++) { 
+           let holiday = users[i].holidayDate; 
+            newArray.push(holiday);
+             }
+
+            //  let status = newArray.indexOf(startDate) 
+            if (newArray.includes(startDate)) {
+                obj.holidayStatus  = 2
+                await attendanceService.leaveAttendance(obj);
+            }else {
+                obj.holidayStatus  = 0
+                await attendanceService.leaveAttendance(obj);
+            }
+
+            
+        // await attendanceService.leaveAttendance(obj);
+        }
+    }
+
+    params.holidayStatus = 1
+    await db.Leave.create(params);
+    //..send email to users  
     let sendToEmail = params.sendTo;
-   
     let sendTo = sendToEmail['sendemail'];
     
     for (let i = 0; i < sendTo.length; i++) { 
@@ -109,26 +158,7 @@ async function create(params) {
 
 //..update the leave after leave applyed 
 //.. user applied leave auto create leave pollicey 
-    var listDate = [];
-    var obj = {}
-    var startDate =params.startDate;
-    var endDate = params.endDate;
-    var dateMove = new Date(startDate);
-    var strDate = startDate;
-    
-    while (strDate < endDate){
-      var strDate = dateMove.toISOString().slice(0,10);
-      listDate.push(strDate);
-      dateMove.setDate(dateMove.getDate()+1);
-    };
-    for (let i = 0; i < listDate.length; i++) { 
-        var startDate = listDate[i]
-
-        obj.userID = params.userID
-        obj.startDate = startDate
-        obj.leaveType = params.leaveType
-        await attendanceService.leaveAttendance(obj);
-    }
+  
 
 }
 

@@ -11,6 +11,7 @@ const userservice = require('../users/user.service');
 const date_ob = new Date();
 const { Sequelize, Op } = require("sequelize");
 const sgMail = require('@sendgrid/mail');
+const { months } = require('moment');
 let data = [];
 
 const apiKey =
@@ -33,7 +34,8 @@ module.exports = {
     updateLeaveAtd,
     update,
     getreminderById,
-    delete: _delete
+    delete: _delete,
+    caluclateAtd
 };
 
 async function authenticate({ email, password }) {
@@ -256,6 +258,8 @@ async function leaveAttendance(params) {
     obj.startDate = params.startDate
     obj.endDate = params.startDate
     obj.leaveType = params.leaveType
+    obj.holidayStatus = params.holidayStatus
+
     await db.Attendace.create(obj);
 
 }
@@ -345,8 +349,7 @@ async function getreminderById(params) {
     objc.otp = randStr;
     objc.email = toMail;
   
-     
-      var msg = {
+    var msg = {
           to: toMail,
           from: 'Sevenchats.blr@gmail.com',
           subject: 'REMINDER OF TIME LINE',
@@ -370,4 +373,57 @@ async function getreminderById(params) {
   
         await db.Otp.create(objc); 
     
+}
+
+  async function caluclateAtd(params) {
+
+    let userID = params.userID;
+ 
+    const monthNames = ["January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December"
+    ];
+
+       var date_ob = new Date();
+       let monthName = monthNames[date_ob.getMonth()];
+
+       let yearName = date_ob.getFullYear();
+        
+        let fullDate = monthName  + " " +  yearName; 
+    
+        var current_month = fullDate;
+        var arrMonth = current_month.split(" ");
+        var first_day = new Date(arrMonth[0] + " 1 " + arrMonth[1]);
+        var last_day = new Date(first_day.getFullYear(), first_day.getMonth() + 1, 0, 23, 59, 59);
+        var startdate = moment(first_day).format("YYYY-MM-DD");
+        var endDate = moment(last_day).format("YYYY-MM-DD");
+  
+        const user = await db.Attendace.findAll({
+            where: {
+                userID:userID,
+                [Op.or]: [{
+                    startDate: {
+                        [Op.between]: [startdate, endDate]
+                    }
+                }, {
+                    startDate: {
+                        [Op.between]: [startdate, endDate]
+                    }
+                }]
+            },
+        })
+ 
+        if (!user) throw ' Not found';
+        if (user.count == 0){
+            data = {
+                "error":'Search Items Notfound',
+                status : 400
+             }
+        }
+        if (user.count !=0){
+             data = {
+                data: user,
+                status : 200
+             }
+        }
+        return await data
 }

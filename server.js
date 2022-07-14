@@ -27,6 +27,8 @@ app.use('/Email', require('./Email/email.controller'));
 
 app.use('/Event', require('./Event/event.controller'));
 
+app.use('/Holiday', require('./Holiday/holiday.controller'));
+
 
 // global error handler
 app.use(errorHandler);

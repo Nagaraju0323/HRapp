@@ -24,6 +24,7 @@ async function initialize() {
     db.Leave = require('../Leave/leave.model')(sequelize);
     db.Email = require('../Email/email.model')(sequelize);
     db.Event = require('../Event/event.model')(sequelize);
+    db.Holiday = require('../Holiday/holiday.model')(sequelize);
     // db.Attendace.removeAttribute('id');
 
 
