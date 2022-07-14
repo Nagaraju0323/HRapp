@@ -7,7 +7,7 @@ function model(sequelize) {
         presentDay: { type: DataTypes.STRING, allowNull: true },
         absentDay: { type: DataTypes.STRING, allowNull: true },
         userID: { type: DataTypes.INTEGER, allowNull: true },
-        inSatus: { type: DataTypes.STRING, allowNull: true },
+        inStatus: { type: DataTypes.STRING, allowNull: true },
         outStatus: { type: DataTypes.STRING, allowNull: true },
         inTime: { type: DataTypes.STRING, allowNull: true },
         outTime: { type: DataTypes.STRING, allowNull: true },
@@ -15,7 +15,7 @@ function model(sequelize) {
         endDate: { type: DataTypes.STRING, allowNull: true },
         leaveType: { type: DataTypes.STRING, allowNull: true },
         leaveStatus: { type: DataTypes.STRING, allowNull: true },
-        holidayStatus: { type: DataTypes.STRING, allowNull: true },
+        holidayStatus: { type: DataTypes.STRING, allowNull: true }
      
     };
 

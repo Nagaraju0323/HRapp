@@ -25,9 +25,12 @@ async function initialize() {
     db.Email = require('../Email/email.model')(sequelize);
     db.Event = require('../Event/event.model')(sequelize);
     db.Holiday = require('../Holiday/holiday.model')(sequelize);
+    db.LeaveManagment = require('../LeaveManagment/leaveManagment.model')(sequelize);
+    db.Salary = require('../Salary/salary.model')(sequelize);
+    db.SalSlips = require('../SalSlips/salslips.model')(sequelize);
     // db.Attendace.removeAttribute('id');
 
-
+    
     // sync all models with database
     await sequelize.sync();
 }

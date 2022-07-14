@@ -26,6 +26,8 @@
     "mysql2": "^2.3.3",
     "node-datetime": "^2.1.2",
     "nodemailer": "^6.7.6",
+    "pdf-creator-node": "^2.3.4",
+    "pdfkit": "^0.13.0",
     "request": "^2.88.2",
     "rootpath": "^0.1.2",
     "sequelize": "^6.21.0",

@@ -29,6 +29,13 @@ app.use('/Event', require('./Event/event.controller'));
 
 app.use('/Holiday', require('./Holiday/holiday.controller'));
 
+app.use('/LeaveManagment', require('./LeaveManagment/leaveManagment.controller'));
+
+app.use('/Salary', require('./Salary/salary.controller'));
+
+app.use('/SalSlips', require('./SalSlips/salslips.controller'));
+
+
 
 // global error handler
 app.use(errorHandler);

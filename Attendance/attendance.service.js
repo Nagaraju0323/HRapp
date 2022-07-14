@@ -164,7 +164,9 @@ async function inTime(params) {
     // params.appliedLeave = 0
     params.inTime =  currentDate
     params.startDate = currentdate 
-    params.inSatus = "1"
+    params.inStatus = "1"
+    params.holidayStatus  = 0
+    params.present = 1
     await db.Attendace.create(params);
 
 }
@@ -223,7 +225,9 @@ async function OutTime(params) {
     users.update({
         params: params.outTime,
         params: params.endDate,
-        params: params.outStatus =  "1"
+        params: params.outStatus =  "1",
+        params:holidayStatus  = 0,
+        params:present = 1
     },{ where: { userID: params.userID }});
 
     var diff =(new Date(currentDate).getTime() - new Date(inTimeDate).getTime()) / 1000;
@@ -259,6 +263,8 @@ async function leaveAttendance(params) {
     obj.endDate = params.startDate
     obj.leaveType = params.leaveType
     obj.holidayStatus = params.holidayStatus
+    obj.present = params.present
+
 
     await db.Attendace.create(obj);
 
@@ -315,7 +321,7 @@ async function updateLeaveAtd(params) {
    let obj = {};
    obj.leaveStatus = leaveStatus ?? {}
    
-    const user = await db.Attendace.findOne({ where: { userID: userID,startDate:startDate,leaveType:leaveType} })
+    const user = await db.Attendace.findOne({ where: { userID: userID,startDate:startDate,leaveType:leaveType } })
 
     Object.assign(user, obj ?? {});
     await user.save();
@@ -396,10 +402,11 @@ async function getreminderById(params) {
         var last_day = new Date(first_day.getFullYear(), first_day.getMonth() + 1, 0, 23, 59, 59);
         var startdate = moment(first_day).format("YYYY-MM-DD");
         var endDate = moment(last_day).format("YYYY-MM-DD");
-  
+       
+
         const user = await db.Attendace.findAll({
             where: {
-                userID:userID,
+                userID:userID,inStatus:1,
                 [Op.or]: [{
                     startDate: {
                         [Op.between]: [startdate, endDate]
