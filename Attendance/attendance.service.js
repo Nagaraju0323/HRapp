@@ -318,14 +318,26 @@ async function updateLeaveAtd(params) {
    let startDate = params.startDate;
    let leaveType = params.leaveType
    let leaveStatus = params.leaveStatus
+   let holidayStatus = 0
    let obj = {};
    obj.leaveStatus = leaveStatus ?? {}
    
-    const user = await db.Attendace.findOne({ where: { userID: userID,startDate:startDate,leaveType:leaveType } })
+    const user = await db.Attendace.findOne({ where: { userID: userID,startDate:startDate,leaveType:leaveType}})
+    if (user.holidayStatus == 0){
 
-    Object.assign(user, obj ?? {});
+     obj.holidayStatus = 5  
+     Object.assign(user, obj ?? {});
     await user.save();
     return omitHash(user.get());
+
+    }else {
+
+        Object.assign(user, obj ?? {});
+        await user.save();
+        return omitHash(user.get());
+    }
+
+    
    
 }
 //enter otp 
@@ -402,11 +414,10 @@ async function getreminderById(params) {
         var last_day = new Date(first_day.getFullYear(), first_day.getMonth() + 1, 0, 23, 59, 59);
         var startdate = moment(first_day).format("YYYY-MM-DD");
         var endDate = moment(last_day).format("YYYY-MM-DD");
-       
-
+    
         const user = await db.Attendace.findAll({
             where: {
-                userID:userID,inStatus:1,
+                userID:userID,holidayStatus:5,
                 [Op.or]: [{
                     startDate: {
                         [Op.between]: [startdate, endDate]

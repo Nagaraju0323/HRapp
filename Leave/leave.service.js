@@ -266,6 +266,7 @@ async function approvedLeave(userID, params) {
         obj.startDate = startDate
         obj.leaveType = params.leaveType
         obj.leaveStatus = params.leaveStatus
+        obj.holidayStatus = params.holidayStatus
         await attendanceService.updateLeaveAtd(obj);
 
         // await attendanceService.leaveAttendance(obj);
