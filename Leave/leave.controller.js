@@ -19,6 +19,7 @@ router.put('/approveLeave', authorize(), approveLeave);
 router.delete('/deleteLeave', authorize(), _delete);
 router.delete('/deleteAll', authorize(), deleteAll);
 
+
 module.exports = router;
 //...loginwith email id 
 

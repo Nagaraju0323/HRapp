@@ -165,7 +165,7 @@ async function inTime(params) {
     params.inTime =  currentDate
     params.startDate = currentdate 
     params.inStatus = "1"
-    params.holidayStatus  = 0
+    params.holidayStatus  = 5
     params.present = 1
     await db.Attendace.create(params);
 
@@ -226,7 +226,7 @@ async function OutTime(params) {
         params: params.outTime,
         params: params.endDate,
         params: params.outStatus =  "1",
-        params:holidayStatus  = 0,
+        params:holidayStatus  = 5,
         params:present = 1
     },{ where: { userID: params.userID }});
 

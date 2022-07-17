@@ -15,6 +15,7 @@ router.get('/getallLeaves', getAll);
 router.get('/getbyUserLeave', getById);
 router.put('/userLeaveUpdate', updateSchema, update);
 router.delete('/userLeaveDelete', _delete);
+// router.put('/userAtdLeaveupdate', updateSchema,userAtdLeaveupdate);
 
 module.exports = router;
 //...loginwith email id 

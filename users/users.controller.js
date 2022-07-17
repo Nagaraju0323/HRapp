@@ -23,6 +23,7 @@ router.post('/forgotpassword', forgotPassword);
 router.post('/sentOtptoemail', sentOtptoemail);
 router.post('/resentOtptoemail', resentOtptoemail);
 router.post('/validateOtp', validateOtp);
+router.post('/updateUserDetails', updateUserDetails);
 
 module.exports = router;
 //...loginwith email id 
@@ -53,6 +54,8 @@ function authenticatemobile(req, res, next) {
         .then(user => res.json(user))
         .catch(next);
 }
+
+
 
 
 //...Registration 
@@ -142,6 +145,16 @@ function userupdate(req, res, next) {
         .then(user => res.json(user))
         .catch(next);
 }
+//..update BankDetails 
+
+function updateUserDetails(req, res, next) {
+    userService.updateuserBank(req.body.userID, req.body)
+        .then(user => res.json(user))
+        .catch(next);
+}
+
+
+
 
 //...Reset Password
 function resetPassword(req, res, next) {

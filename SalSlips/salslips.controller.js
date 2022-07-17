@@ -5,12 +5,16 @@ const validateRequest = require('_middleware/validate-request');
 const authorize = require('_middleware/authorize')
 const userService = require('./salslips.service');
 const usershortid  = require("shortid");
+const fs = require("fs");
+const path = require("path");
+
 
 // routes
 // router.post('/login', authenticateSchema, authenticate);
 
 
 router.post('/createSalslip',authorize(),registerSchema,createSalslip);
+router.post('/genrateSalSlip',authorize(),genrateSalSlip);
 router.get('/getallLeaves', getAll);
 router.get('/getbyUserLeave', getById);
 router.put('/userLeaveUpdate', updateSchema, update);
@@ -88,3 +92,11 @@ function _delete(req, res, next) {
         .then(() => res.json({ message: 'Add deleted successfully' }))
         .catch(next);
 }
+
+function genrateSalSlip(req, res, next) {
+    userService.getgenerateSlips(req.body.userID)
+        .then(() => res.json({ message: 'Add deleted successfully' }))
+        .catch(next);
+}
+
+

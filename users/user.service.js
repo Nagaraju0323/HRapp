@@ -28,7 +28,8 @@ module.exports = {
     userupdateID,
     user_delete,
     forgotpassword,
-    validOtp
+    validOtp,
+    updateuserBank
     
 };
 
@@ -172,6 +173,27 @@ async function userupdateID(userID, params) {
 
     return omitHash(user.get());
 }
+
+async function updateuserBank(userID, params) {
+   
+    let objc = {};
+    console.log('account',objc)
+    const user = await db.User.findOne({ where: { userID:userID } })
+    objc.accountNo = params.accountNo;
+    objc.Doj = params.Doj
+    objc.bankName = params.bankName;
+    objc.PAN = params.PAN
+   
+    // copy params to user and save
+    Object.assign(user, objc);
+    await user.save();
+
+    return omitHash(user.get());
+}
+
+
+
+
 
 
 //...reset Password userInfo

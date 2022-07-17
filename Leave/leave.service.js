@@ -92,6 +92,45 @@ async function create(params) {
     var dateMove = new Date(startDate);
     var strDate = startDate;
     
+    if (params.leaveType == 3){
+        console.log('workfromhome')
+
+        obj.userID = params.userID
+        obj.startDate = startDate
+        obj.leaveType = params.leaveType
+
+        var givenDate = new Date(startDate);
+        var currentDay = givenDate.getDay();
+        var dateIsInWeekend = (currentDay === 6) || (currentDay === 0);
+        if(dateIsInWeekend==true){
+
+            obj.holidayStatus  = 1
+            await attendanceService.leaveAttendance(obj);
+           
+        } else {
+          let status = 0
+           let users = await db.Holiday.findAll()
+           for (let i = 0; i < users.length; i++) { 
+           let holiday = users[i].holidayDate; 
+            newArray.push(holiday);
+             }
+
+            //  let status = newArray.indexOf(startDate) 
+            if (newArray.includes(startDate)) {
+                obj.holidayStatus  = 2
+                await attendanceService.leaveAttendance(obj);
+            }else {
+                obj.holidayStatus  = 0
+                await attendanceService.leaveAttendance(obj);
+            }
+
+        }
+
+
+    }else {
+
+
+
     while (strDate < endDate){
       var strDate = dateMove.toISOString().slice(0,10);
       listDate.push(strDate);
@@ -135,6 +174,10 @@ async function create(params) {
         // await attendanceService.leaveAttendance(obj);
         }
     }
+  }
+
+
+
 
     params.holidayStatus = 1
     await db.Leave.create(params);
@@ -253,6 +296,18 @@ async function approvedLeave(userID, params) {
     var endDate = params.endDate;
     var dateMove = new Date(startDate);
     var strDate = startDate;
+
+    if (params.leaveType == 3){
+
+        obj.userID = params.userID
+        obj.startDate = strDate
+        obj.leaveType = params.leaveType
+        obj.leaveStatus = params.leaveStatus
+        obj.holidayStatus = params.holidayStatus
+        await attendanceService.updateLeaveAtd(obj);
+
+
+    }else {
     
     while (strDate < endDate){
       var strDate = dateMove.toISOString().slice(0,10);
@@ -271,6 +326,10 @@ async function approvedLeave(userID, params) {
 
         // await attendanceService.leaveAttendance(obj);
     }
+    }
+
+
+
     return omitHash(user.get());
 }
 

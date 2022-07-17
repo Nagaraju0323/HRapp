@@ -5,10 +5,18 @@ const db = require('_helpers/db');
 const { Sequelize, Op } = require("sequelize");
 const userServices  = require("shortid");
 const userService = require('./salslips.service');
+const attendanceService = require('../Attendance/attendance.service');
+const usersal = require('../Salary/salary.service');
 const PDFDocument = require('pdfkit');
 var pdf = require("pdf-creator-node");
 var fs = require("fs");
-const doc = new PDFDocument();
+const path = require("path");
+
+// const { html_to_pdf } = require(".");
+const puppeteer = require("puppeteer");
+const handlebars = require("handlebars");
+var html_to_pdf = require('html-to-pdf');
+
 
 
 
@@ -20,7 +28,9 @@ module.exports = {
     getAll,
     getById,
     update,
-    delete: _delete
+    delete: _delete,
+    getgenerateSlips,
+   
     
 };
 
@@ -38,66 +48,6 @@ async function authenticate({ email, password }) {
 }
 
 async function create(params) {
-
-    var html = fs.readFileSync("index.html", "utf8");
-    // save user
-    var options = {
-        format: "A3",
-        orientation: "portrait",
-        border: "10mm",
-        header: {
-            height: "45mm",
-            contents: '<div style="text-align: center;">Author: Shyam Hajare</div>'
-        },
-        footer: {
-            height: "28mm",
-            contents: {
-                first: 'Cover page',
-                2: 'Second page', // Any page number is working. 1-based index
-                default: '<span style="color: #444;">{{page}}</span>/<span>{{pages}}</span>', // fallback value
-                last: 'Last Page'
-            }
-        }
-    };
-
-    var users = [
-        {
-          name: "Shyam",
-          age: "26",
-        },
-        {
-          name: "Navjot",
-          age: "26",
-        },
-        {
-          name: "Vitthal",
-          age: "26",
-        },
-      ];
-      var document = {
-        html: html,
-        data: {
-          users: users,
-        },
-        path: "./output.pdf",
-        type: "",
-      };
-
-
-
-      pdf
-      .create(document, options)
-      .then((res) => {
-        console.log(res);
-      })
-      .catch((error) => {
-        console.error(error);
-      });
-
-
-    await db.SalSlips.create(params);
-
-    
 
 
 }
@@ -136,3 +86,162 @@ function omitHash(user) {
     return userWithoutHash;
 }
 
+
+
+
+
+async function getgenerateSlips(userID) {
+
+ //get the user 
+
+ console.log('this is calling',userID)
+
+ const user = await db.User.findOne({ where: { userID: userID } })
+ const userSalDetails = await db.Salary.findOne({ where: { userID: userID } })
+ console.log(userSalDetails)
+  
+  const dataBinding = {
+    items: [
+      {
+        name: "Name",
+        price: user.firstName + user.firstName,
+      },
+      {
+        name: "Bank Name",
+        price: user.bankName + " " + 'Bank',
+      },
+      {
+        name: 'DOJ',
+        price: user.Doj,
+      },
+      {
+        name: "workingDays",
+        price: 30,
+      },
+      {
+        name: 'Location',
+        price: 'Bangalore',
+      },
+    ],
+    itemss: [
+      {
+        name: "Basic",
+        price: userSalDetails.basicPay,
+      },
+      {
+        name: "HRA",
+        price: userSalDetails.hra,
+      },
+      {
+        name: 'Conveyance',
+        price: '800.00',
+      },
+      {
+        name: "Special_Allowance",
+        price: userSalDetails.specialAllowance,
+      },
+      
+    ],
+    items2: [
+      {
+        name: "Designation",
+        price: 24000.00,
+      },
+      {
+        name: "Bank A/c No.",
+        price: '9600.00',
+      },
+      {
+        name: 'PAN',
+        price: '800.00',
+      },
+      {
+        name: "Absent Days",
+        price: '25,600.00',
+      },
+      {
+        name: "LOP Days",
+        price: '25,600.00',
+      },
+      
+      
+    ],
+
+    total: 600,
+    GrossEarnings:'60,000.00',
+    GrossDeductions:'200.00',
+    NETPAY:'59,800.00',
+    isWatermark: false,
+  };
+
+
+
+  const dataBinding_Amount = {
+    itemss: [
+      {
+        name: "Basic",
+        price: 'kankanala Nagaraju',
+      },
+      {
+        name: "HRA",
+        price: 999979839423444,
+      },
+      {
+        name: 'Conveyance',
+        price: 300,
+      },
+      {
+        name: "Special_Allowance",
+        price: 30,
+      },
+      
+    ],
+    total: 900,
+    isWatermark: false,
+  };
+
+  const templateHtml = fs.readFileSync(
+    path.join(process.cwd(), "invoice.html"),
+    "utf8"
+  );
+
+  const options = {
+    format: "A4",
+    headerTemplate: "<p></p>",
+    footerTemplate: "<p></p>",
+    displayHeaderFooter: false,
+    margin: {
+      top: "40px",
+      bottom: "100px",
+    },
+    printBackground: true,
+    path: "invoice_nagaraju.pdf",
+  };
+
+  await html_to_pdfs(templateHtml, dataBinding,dataBinding_Amount, options);
+
+}
+
+async function html_to_pdfs(templateHtml, dataBinding,dataBinding_Amount, options) {
+  
+  console.log("Done: invoice.pdf is created!");
+
+ 
+    console.log("Done: invoice.pdf is created!");
+    const template = handlebars.compile(templateHtml);
+    const finalHtml = encodeURIComponent(template(dataBinding,dataBinding_Amount));
+  
+    const browser = await puppeteer.launch({
+      args: ["--no-sandbox"],
+      headless: true,
+    });
+    const page = await browser.newPage();
+    await page.goto(`data:text/html;charset=UTF-8,${finalHtml}`, {
+      waitUntil: "networkidle0",
+    });
+    // console('logmessage',options)
+    await page.pdf(options);
+    await browser.close();
+  
+
+}

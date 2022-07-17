@@ -15,6 +15,10 @@ function model(sequelize) {
         Address: { type: DataTypes.STRING, allowNull:false},
         profileImg: { type: DataTypes.STRING, allowNull:false},
         userID: { type: DataTypes.INTEGER, allowNull:false},
+        accountNo: { type: DataTypes.STRING, allowNull:true},
+        Doj: { type: DataTypes.STRING, allowNull:true},
+        bankName: { type: DataTypes.STRING, allowNull:true},
+        PAN: { type: DataTypes.STRING, allowNull:true},
         hash: { type: DataTypes.STRING, allowNull: false }
     };
 
