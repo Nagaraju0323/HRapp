@@ -6,12 +6,15 @@ var dateTime = require('node-datetime');
 const { text } = require('body-parser');
 var moment = require('moment');
 const { param } = require('./attendance.controller');
-// const sentmailService = require('../Otp/otp.service');
 const userservice = require('../users/user.service');
+const userserviceLeave = require('../LeaveManagment/leaveManagment.service');
 const date_ob = new Date();
 const { Sequelize, Op } = require("sequelize");
 const sgMail = require('@sendgrid/mail');
 const { months } = require('moment');
+const { ConsoleMessage } = require('puppeteer');
+
+
 let data = [];
 
 const apiKey =
@@ -29,13 +32,15 @@ module.exports = {
     inTime,
     leaveAttendance,
     OutTime,
+    empabsent,
     getbyDate,
     getbyDiffDate,
     updateLeaveAtd,
     update,
     getreminderById,
     delete: _delete,
-    caluclateAtd
+    caluclateAtd,
+    caluclateLeaveMng
 };
 
 async function authenticate({ email, password }) {
@@ -151,14 +156,13 @@ async function inTime(params) {
     let currentdate =  year + "-" + month + "-" + date ;
 
     const user = await db.Attendace.findAndCountAll({ where: { userID } });
-    
-  //check user Alreadylogin 
     for (let i = 0; i < user.count; i++) { 
-        // console.log('messageLoad',timesplit)
+        if (user.rows[i].startDate == currentdate){
         var timesplit = user.rows[i].inTime.split(' ')[0];
         if (currentdate === timesplit){
             if (user) throw 'already login';
            return user;
+        }
         }
       }
     // params.appliedLeave = 0
@@ -206,10 +210,13 @@ async function OutTime(params) {
     //...check user Alreadylogin 
     
     for (let i = 0; i < user.count; i++) { 
+        if (user.rows[i].startDate == currentdate){
         var inTimestm = user.rows[i].inTime.split(' ')[0];
         if (inTimestm == currentdate){
             inTimeDate = user.rows[i].inTime;
         }
+    }
+    if (user.rows[i].startDate == currentdate){
         if (user.rows[i].outTime != null){
             var timesplit = user.rows[i].outTime.split(' ')[0];
             if (currentdate == timesplit){
@@ -217,6 +224,7 @@ async function OutTime(params) {
             return user;
             }
         }
+      }
     }
 
     const users = await getUserIDDate(params.userID,inTimeDate);
@@ -234,17 +242,10 @@ async function OutTime(params) {
     diff /= 60;
     let matthdif =  Math.abs(Math.round(diff));
     if (matthdif <= 480){
-        //send mail to particular person 
-        console.log('send mail to not complete 8 hours')
- 
        const userinfo = await db.User.findOne({ where: { userID:userID}});
-      
-       console.log('useremailID',userinfo.email)
-
        objc.sendTo = userinfo.email
        objc.titleType = 'REMINDER OF TIME LINE'
        objc.descriptionType = 'YOUR NOT COMPLETED THE 8 HOUTS SO GENTLE REMINDER TO FINISH NEXT TIME',
-    //    await sentmailService.sendReminderAtd(objc);
         getreminderById(objc)
 
     }
@@ -258,14 +259,14 @@ async function OutTime(params) {
 //leave attenance 
 async function leaveAttendance(params) {
     let obj = {};
-    obj.userID = params.userID
-    obj.startDate = params.startDate
-    obj.endDate = params.startDate
-    obj.leaveType = params.leaveType
-    obj.holidayStatus = params.holidayStatus
-    obj.present = params.present
-
-
+    obj.userID = params.userID;
+    obj.startDate = params.startDate;
+    obj.endDate = params.startDate;
+    obj.leaveType = params.leaveType;
+    obj.holidayStatus = params.holidayStatus;
+    obj.leaveStatus = params.leaveStatus;
+    obj.present = params.present;
+    
     await db.Attendace.create(obj);
 
 }
@@ -318,32 +319,106 @@ async function updateLeaveAtd(params) {
    let startDate = params.startDate;
    let leaveType = params.leaveType
    let leaveStatus = params.leaveStatus
+   var endDate = params.endDate;
    let holidayStatus = 0
+   var listDate = [];
    let obj = {};
    obj.leaveStatus = leaveStatus ?? {}
    
     const user = await db.Attendace.findOne({ where: { userID: userID,startDate:startDate,leaveType:leaveType}})
+
+  //calculate the leave mangagement 
+
+        while (strDate < endDate){
+        var strDate = dateMove.toISOString().slice(0,10);
+        listDate.push(strDate);
+        dateMove.setDate(dateMove.getDate()+1);
+        };
+    var givenDate = new Date(startDate);
+    var currentDay = givenDate.getDay();
+    var dateIsInWeekend = (currentDay === 6) || (currentDay === 0);
+
+    if(params.leaveType == 1 || params.leaveType == 2){
+            if(dateIsInWeekend==true){
+            } else {
+                const users = await caluclateLeaveMng(params);
+            }
+        }
+    
     if (user.holidayStatus == 0){
 
-     obj.holidayStatus = 5  
+        if (leaveStatus == 2){
+        obj.holidayStatus = 2; 
+
+     } else if (params.leaveType == 4 ) {
+        obj.holidayStatus = 4; 
+    }else {
+        obj.holidayStatus = 5
+        obj.leaveCount = 1
+
+     }
+
      Object.assign(user, obj ?? {});
     await user.save();
     return omitHash(user.get());
-
-    }else {
-
+     }else {
         Object.assign(user, obj ?? {});
         await user.save();
         return omitHash(user.get());
     }
-
     
    
 }
+
+//..absent 
+//update the leve attendance 
+async function empabsent(params) {
+    
+    let userID = params.userID
+
+    let date = ("0" + date_ob.getDate()).slice(-2);
+
+    // current month
+    let month = ("0" + (date_ob.getMonth() + 1)).slice(-2);
+    
+    // current year
+    let year = date_ob.getFullYear();
+    
+    // current hours
+    let hours = date_ob.getHours() % 12 ;
+    
+    // current minutes
+    let minutes = date_ob.getMinutes();
+    
+    let ampm = date_ob.getHours() < 12 ? "AM" : "PM";
+    
+    // current seconds
+    let seconds = date_ob.getSeconds();
+
+    let currentDate = year + "-" + month + "-" + date + " " + hours + ":" + minutes + ":" + seconds + " " + ampm;
+    let currentdate =  year + "-" + month + "-" + date ;
+
+    const user = await db.Attendace.findAndCountAll({ where: { userID } });
+    
+  //check user Alreadylogin 
+    for (let i = 0; i < user.count; i++) { 
+        if (user.rows[i].startDate == currentdate){
+        var timesplit = user.rows[i].inTime.split(' ')[0];
+        if (currentdate === timesplit){
+            if (user) throw 'already absent Done';
+           return user;
+        }
+      }
+    }
+    params.inTime =  currentDate
+    params.startDate = currentdate 
+    params.endDate = currentdate 
+    params.holidayStatus  = 6
+    params.absentDay  = 1
+    await db.Attendace.create(params);
+
+ }
 //enter otp 
-
-// helper functions
-
 async function getUser(id) {
     const user = await db.Attendace.findByPk(id);
     if (!user) throw 'User not found';
@@ -396,6 +471,7 @@ async function getreminderById(params) {
   async function caluclateAtd(params) {
 
     let userID = params.userID;
+    let datas = [];
  
     const monthNames = ["January", "February", "March", "April", "May", "June",
     "July", "August", "September", "October", "November", "December"
@@ -403,6 +479,9 @@ async function getreminderById(params) {
 
        var date_ob = new Date();
        let monthName = monthNames[date_ob.getMonth()];
+       //downdload moths wise 
+
+    //    let monthName = monthNames[date_ob.getMonth()];
 
        let yearName = date_ob.getFullYear();
         
@@ -429,7 +508,39 @@ async function getreminderById(params) {
                 }]
             },
         })
- 
+
+        const userabsent = await db.Attendace.findAll({
+            where: {
+                userID:userID,holidayStatus:1,
+                [Op.or]: [{
+                    startDate: {
+                        [Op.between]: [startdate, endDate]
+                    }
+                }, {
+                    startDate: {
+                        [Op.between]: [startdate, endDate]
+                    }
+                }]
+            },
+        })
+        const userLeave = await db.Attendace.findAll({
+            where: {
+                userID:userID,leaveCount:1,
+                [Op.or]: [{
+                    startDate: {
+                        [Op.between]: [startdate, endDate]
+                    }
+                }, {
+                    startDate: {
+                        [Op.between]: [startdate, endDate]
+                    }
+                }]
+            },
+        })
+
+
+
+        console.log('countdata')
         if (!user) throw ' Not found';
         if (user.count == 0){
             data = {
@@ -437,11 +548,37 @@ async function getreminderById(params) {
                 status : 400
              }
         }
-        if (user.count !=0){
+        if (user.count != 0){
              data = {
+                absentCount:userabsent,
+                leavedate:userLeave,
                 data: user,
                 status : 200
              }
         }
-        return await data
+
+        return data
+}
+
+//leave mangagement 
+async function caluclateLeaveMng(params) {
+   
+    const user = await db.LeaveManagment.findOne({ where: { userID: params.userID } })
+    if (!user) throw ' Not found';
+    let objc = {};
+    let sickleave = user.sickLeaves;
+    let casualleave = user.leaveType;
+    if (params.leaveType == 1){
+        sickleave = sickleave - 1; 
+
+    }else if(params.leaveType == 2){
+    casualleave = casualleave - 1 ; 
+    }
+    objc.userID = params.userID;
+    objc.casualLeaves = casualleave;
+    objc.sickLeaves = sickleave;
+    await userserviceLeave.update(params.userID,objc)
+
+    return user;
+
 }

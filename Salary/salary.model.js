@@ -9,6 +9,7 @@ function model(sequelize) {
         basicPay: { type: DataTypes.INTEGER, allowNull: true },
         hra: { type: DataTypes.INTEGER, allowNull: true },
         specialAllowance : { type: DataTypes.INTEGER, allowNull: true },
+        Conveyance : { type: DataTypes.INTEGER, allowNull: true },
         travelAllowance: { type: DataTypes.INTEGER, allowNull: true },
         Esi: { type: DataTypes.INTEGER, allowNull: true },
         employeerPF: { type: DataTypes.INTEGER, allowNull: true },

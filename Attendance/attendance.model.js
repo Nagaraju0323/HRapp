@@ -15,6 +15,7 @@ function model(sequelize) {
         endDate: { type: DataTypes.STRING, allowNull: true },
         leaveType: { type: DataTypes.STRING, allowNull: true },
         leaveStatus: { type: DataTypes.STRING, allowNull: true },
+        leaveCount: { type: DataTypes.INTEGER, allowNull: true },
         holidayStatus: { type: DataTypes.STRING, allowNull: true }
      
     };

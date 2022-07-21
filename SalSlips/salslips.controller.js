@@ -9,12 +9,14 @@ const fs = require("fs");
 const path = require("path");
 
 
+
 // routes
 // router.post('/login', authenticateSchema, authenticate);
 
 
 router.post('/createSalslip',authorize(),registerSchema,createSalslip);
 router.post('/genrateSalSlip',authorize(),genrateSalSlip);
+router.post('/downloadSalSlip',authorize(),downloadSalSlip);
 router.get('/getallLeaves', getAll);
 router.get('/getbyUserLeave', getById);
 router.put('/userLeaveUpdate', updateSchema, update);
@@ -52,8 +54,8 @@ function getAll(req, res, next) {
 function registerSchema(req, res, next) {
     const schema = Joi.object({
         userID: Joi.number().required(),
-        salAmount: Joi.number().required(),
-        workingDays: Joi.number().required(),
+        salarySlip: Joi.string().required(),
+        salaryDate: Joi.string().required(),
         
     });
     validateRequest(req, next, schema);
@@ -63,7 +65,7 @@ function registerSchema(req, res, next) {
 //..eventAdd
 function createSalslip(req, res, next) {
     userService.create(req.body)
-        .then(() => res.json({ message: 'Leaves Add' }))
+        .then(() => res.json({ message: 'generateD Salary Slips' }))
         .catch(next);
 }
 function getById(req, res, next) {
@@ -94,7 +96,13 @@ function _delete(req, res, next) {
 }
 
 function genrateSalSlip(req, res, next) {
-    userService.getgenerateSlips(req.body.userID)
+    userService.getgenerateSlips(req.body)
+        .then(() => res.json({ message: 'Add deleted successfully' }))
+        .catch(next);
+}
+
+function downloadSalSlip(req, res, next) {
+    userService.downloadSalSlips(req.body)
         .then(() => res.json({ message: 'Add deleted successfully' }))
         .catch(next);
 }

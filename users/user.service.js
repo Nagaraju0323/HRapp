@@ -26,10 +26,13 @@ module.exports = {
     resetPassword,
     update,
     userupdateID,
+    userprofileUpdate,
     user_delete,
     forgotpassword,
     validOtp,
-    updateuserBank
+    updateuserBank,
+    sendOtpToMobile,
+    sendOtpToMobile_valid
     
 };
 
@@ -173,6 +176,23 @@ async function userupdateID(userID, params) {
 
     return omitHash(user.get());
 }
+//..update user profile
+
+
+async function userprofileUpdate(userID, params) {
+    const user = await getUserID(userID);
+    const file = fs.readFileSync(params.profileImg);
+    const base64String = Buffer.from(file).toString('base64');
+    console.log(base64String)
+  
+
+    // copy params to user and save
+    Object.assign(user, params);
+    await user.save();
+
+    return omitHash(user.get());
+}
+
 
 async function updateuserBank(userID, params) {
    
@@ -190,9 +210,6 @@ async function updateuserBank(userID, params) {
 
     return omitHash(user.get());
 }
-
-
-
 
 
 
@@ -294,8 +311,77 @@ async function forgotpassword(param) {
     // return user;
 }
 
+
+async function sendOtpToMobile(param) {
+    var objc = {}
+    const user = await db.User.findOne({ where: { mobileNo: param.mobileNo } })
+    objc.mobileNo = user.mobileNo
+    // await forgotpasswordtoEmail(objc)
+
+    let toMobile = user.mobileNo
+    
+    var rand = Math.floor(Math.random() * 1000000);
+    var randStr = rand
+    
+    
+    let randomnumber = 'ConfimrationCode' + '\n' + randStr
+   
+    objc.otp = randStr;
+    objc.mobileNo = toMobile;
+
+    let html_code = "https://api.textlocal.in/send/?apikey=N2E0MzdhNjk0NjYxNDQ0NjRmNDE2YjQ5NDE0ZTY4NjM=&numbers=9966141512&sender=SEVNAU&message=We have received a request for password change of your Sevenchats account, If you wish to proceed then please click the link https://sevenchats.com, if you did not request then please ignore this message.";
+
+     
+    // nexmo.verify.request({}, function(err, result) {
+    //     if(err) { console.error(err); }
+    //     else {
+    //       verifyRequestId = result. request_id;
+    //     }
+    //   });
+
+  
+         //delete the existed otps 
+         const users = await db.Otp.findOne({ where: { mobileNo:param.mobileNo}})
+         if (!users) {
+             console.log('users')
+            await db.Otp.create(objc);
+            //callingin the apit
+            sendOtpToMobile_valid(mobileNo)
+            // request.post(html_code, {form:{key:'value'}})
+
+            
+         }else {
+            console.log('users2')
+            await users.destroy();
+            await db.Otp.create(objc);
+            // sendOtpToMobile_valid(mobileNo)
+          
+         }
+   
+    // // // const user = await db.User.findByPk(userID);
+    // if (!user) throw 'User not found';
+    return user;
+}
+
 async function validOtp(param) {
     const user = await db.Otp.findOne({ where: { email:param.email}})
     if (param.otp != user.otp) throw 'Otp Does not Match';
     return user;
+}
+
+
+async function sendOtpToMobile_valid(param) {
+    console.log(param)
+    // const user = await db.Otp.findOne({ where: { email:param.email}})
+    // if (param.otp != user.otp) throw 'Otp Does not Match';
+    // return user;
+    let html_code = "https://api.textlocal.in/send/?apikey=N2E0MzdhNjk0NjYxNDQ0NjRmNDE2YjQ5NDE0ZTY4NjM=&numbers=9966141512&sender=SEVNAU&message=We have received a request for password change of your Sevenchats account, If you wish to proceed then please click the link https://sevenchats.com, if you did not request then please ignore this message.";
+    request(html_code, function (error, response, body) {
+    if (!error && response.statusCode === 200) {
+        console.log(body) // Print the google web page.
+     }
+})
+return 'logmessage'
+
+
 }

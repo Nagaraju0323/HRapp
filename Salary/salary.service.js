@@ -31,6 +31,10 @@ async function authenticate({ email, password }) {
 
 async function create(params) {
     // save user
+
+    if (await db.Salary.findOne({ where: { userID: params.userID } })) {
+        throw 'salary is already added';
+    }
     await db.Salary.create(params);
 }
 async function getAll() {

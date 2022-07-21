@@ -28,6 +28,8 @@ async function initialize() {
     db.LeaveManagment = require('../LeaveManagment/leaveManagment.model')(sequelize);
     db.Salary = require('../Salary/salary.model')(sequelize);
     db.SalSlips = require('../SalSlips/salslips.model')(sequelize);
+    db.Compoff = require('../Compoff/compoff.model')(sequelize);
+   
     // db.Attendace.removeAttribute('id');
 
     

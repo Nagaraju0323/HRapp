@@ -6,11 +6,11 @@ const authorize = require('_middleware/authorize')
 const userService = require('./attendance.service');
 
 // routes
-// router.post('/authenticate', authenticateSchema, authenticate);
+
 router.post('/empAttendanceIn',  authorize(),registerSchemaIn, employeeInTime);
 router.post('/empAttendanceOut',  authorize(),registerSchemaOut, employeeOutTime);
+router.post('/absent',authorize(), employeeabsent);
 //..leaveapply 
-
 router.get('/getAllAttendance', authorize(), getAll);
 router.get('/getAllbyId', authorize(), getAllAtd);
 router.get('/getCurrentDate', authorize(), getbyCurrentDate);
@@ -34,7 +34,8 @@ function registerSchemaIn(req, res, next) {
     });
     validateRequest(req, next, schema);
 }
-//..Apply Leave
+
+
 
 function registerSchemaOut(req, res, next) {
     const schema = Joi.object({
@@ -60,6 +61,12 @@ function employeeInTime(req, res, next) {
 function employeeOutTime(req, res, next) {
     userService.OutTime(req.body)
         .then(() => res.json({ message: 'successfully out',status:0}))
+        .catch(next);
+}
+
+function employeeabsent(req, res, next) {
+    userService.empabsent(req.body)
+        .then(() => res.json({ message: 'Employee Is absent',status:0}))
         .catch(next);
 }
 

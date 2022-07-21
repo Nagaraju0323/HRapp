@@ -114,29 +114,28 @@
         PAID </div>
     {{/if}}
     <div class="invoice-box">
+        
         <table cellpadding="2" cellspacing="2">
 
-            <tr class="information">
-                <td colspan="2">
-                    <table>
+        
                         <tr>
-                            <td>
-                                SEVENCHATS PRIVATE LIMITED.<br>
-                                No 2/1 7th Road, Nandi Durga Extension Benson Town, Bangalore 560 046<br>
-                            </td>
-
+                                <h1 style="text-align:center;font-size:14px;"> SEVENCHATS PRIVATE LIMITED.<br>
+                                    No 2/1 7th Road, Nandi Durga Extension <br>Benson Town, Bangalore 560 046<br></h1>
                         </tr>
-                    </table>
-                </td>
-            </tr>
-
+                   
+              
             <tr class="heading">
-                <td>
-                    <td>
-                        Payslip for FEB 2021
-                              
-                    </td>
+                <tr>
+               <!-- <table> -->
+                <h1 style="text-align:center;font-size:14px;"> Payslip for FEB 2022<br></h1>
+             
+                    <!-- <td>Payslip for FEB 2021</td> -->
+                    
+                    <!-- Payslip for FEB 2021 -->
+                   
                 </td>
+                
+            </tr>
 
             </tr>
            
@@ -150,22 +149,15 @@
                 </td>
                 
                 <td>
-                     Gross Earnigs
+                     {{percentage}}
                 </td>
 
                 <td>
-                    {{price}}
+                    {{quantity}}
                 </td>
             </tr>
             {{/each}}
 
-            <!-- <tr class="total">
-                <td></td>
-
-                <td>
-                    Total: $ {{total}}
-                </td>
-            </tr> -->
             
         </table>
     </div>
@@ -302,20 +294,21 @@
             </tr>
 
             {{#each itemss}}
-            <tr class="items">
+            <tr class="items2">
                 <td>
-                   {{name}}
+                    {{name}}
                 </td>
                 <td>
                     {{price}}
                 </td>
-                <td>
-                    {{name}}
-                 </td>
-                 <td>
-                     {{price}}
-                 </td>
                 
+                <td>
+                     {{percentage}}
+                </td>
+
+                <td>
+                    {{quantity}}
+                </td>
             </tr>
             {{/each}}
 

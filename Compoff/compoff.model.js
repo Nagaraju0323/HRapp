@@ -1,16 +1,14 @@
 const { DataTypes } = require('sequelize');
-const userService = require('./salslips.service');
-
 
 module.exports = model;
 
 function model(sequelize) {
     const attributes = {
-        userID: { type: DataTypes.INTEGER, allowNull: true },
-        salarySlips:{ type: DataTypes.STRING, allowNull: true },
-        salaryyear:{ type: DataTypes.STRING, allowNull: true },
-        salarymonth:{ type: DataTypes.STRING, allowNull: true },
         
+        userID: { type: DataTypes.INTEGER, allowNull: false },
+        resonOf: { type: DataTypes.STRING, allowNull: false },
+        applydate: { type: DataTypes.STRING, allowNull: true },
+        takendate: { type: DataTypes.STRING, allowNull: true },
     };
 
     const options = {
@@ -24,5 +22,6 @@ function model(sequelize) {
         }
     };
 
-    return sequelize.define('SalSlips', attributes, options);
+    return sequelize.define('Compoff', attributes, options);
 }
+

@@ -35,6 +35,10 @@ app.use('/Salary', require('./Salary/salary.controller'));
 
 app.use('/SalSlips', require('./SalSlips/salslips.controller'));
 
+app.use('/Compoff', require('./Compoff/compoff.controller'));
+
+
+
 
 
 // global error handler

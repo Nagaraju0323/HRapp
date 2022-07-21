@@ -6,11 +6,15 @@ const { Sequelize, Op } = require("sequelize");
 const userServices  = require("shortid");
 const userService = require('./leave.service');
 const attendanceService = require('../Attendance/attendance.service');
+const compoOffService = require('../Compoff/compoff.service');
 // const otpService = require('../Otp/otp.service');
 const emailService = require('../Email/email.service');
 const { BlockDomain } = require('sib-api-v3-sdk');
 const { send } = require('express/lib/response');
 const nodemailer = require("nodemailer");
+const leaveManagmentService = require('../LeaveManagment/leaveManagment.service');
+const { param } = require('./leave.controller');
+const e = require('cors');
 let data = [];
 module.exports = {
     authenticate,
@@ -24,7 +28,9 @@ module.exports = {
     getbyDiffDate,
     delete: _delete,
     getsendLeave,
+    compareLeavemanagement,
     deleteAll: _deleteAll,
+   
 };
 
 //...user Login
@@ -67,9 +73,16 @@ async function getAllbyId(userID) {
 
 //...create user
 async function create(params) {
-    
-    //..check with User Applied or not 
+
     let userID = params.userID;
+    var listDate = [];
+    let newArray = [];
+    var obj = {}
+    var startDate =params.startDate;
+    var endDate = params.endDate;
+    var dateMove = new Date(startDate);
+    var strDate = startDate;
+   
     let LeaveApplyDate  = params.startDate;
     let objc = {};
 
@@ -83,18 +96,101 @@ async function create(params) {
             return user;
             }
         }
-    //udpate the attendance 
-    var listDate = [];
-    let newArray = [];
-    var obj = {}
-    var startDate =params.startDate;
-    var endDate = params.endDate;
-    var dateMove = new Date(startDate);
-    var strDate = startDate;
-    
     if (params.leaveType == 3){
         console.log('workfromhome')
 
+        while (strDate < endDate){
+            var strDate = dateMove.toISOString().slice(0,10);
+            listDate.push(strDate);
+            dateMove.setDate(dateMove.getDate()+1);
+          };
+    
+          if (listDate.length == 0){
+        obj.userID = params.userID
+        obj.startDate = startDate
+        obj.leaveType = params.leaveType
+
+        var givenDate = new Date(startDate);
+        var currentDay = givenDate.getDay();
+        var dateIsInWeekend = (currentDay === 6) || (currentDay === 0);
+        if(dateIsInWeekend==true){
+
+            obj.leaveStatus = 3
+            obj.holidayStatus  = 0
+            await attendanceService.leaveAttendance(obj);
+           
+        } else {
+          let status = 0
+           let users = await db.Holiday.findAll()
+           for (let i = 0; i < users.length; i++) { 
+           let holiday = users[i].holidayDate; 
+            newArray.push(holiday);
+             }
+            //  let status = newArray.indexOf(startDate) 
+            if (newArray.includes(startDate)) {
+                obj.leaveStatus = 3
+                obj.holidayStatus  = 2
+                await attendanceService.leaveAttendance(obj);
+            }else {
+                obj.leaveStatus = 3
+                obj.holidayStatus  = 0
+                await attendanceService.leaveAttendance(obj);
+            }
+        }
+          }else {
+        
+            for (let i = 0; i < listDate.length; i++) { 
+
+                var startDate = listDate[i]
+                obj.userID = params.userID
+                obj.startDate = startDate
+                obj.leaveType = params.leaveType
+
+                var startDate = listDate[i]
+                var givenDate = new Date(startDate);
+                var currentDay = givenDate.getDay();
+                var dateIsInWeekend = (currentDay === 6) || (currentDay === 0);
+                if(dateIsInWeekend==true){
+        
+                    obj.holidayStatus  = 0
+                    obj.leaveStatus = 3
+                    await attendanceService.leaveAttendance(obj);
+                   
+                } else {
+                  let status = 0
+                   let users = await db.Holiday.findAll()
+                   for (let i = 0; i < users.length; i++) { 
+                   let holiday = users[i].holidayDate; 
+                    newArray.push(holiday);
+                     }
+        
+                    //  let status = newArray.indexOf(startDate) 
+                    if (newArray.includes(startDate)) {
+                        obj.holidayStatus  = 2
+                        obj.leaveStatus = 3
+                        await attendanceService.leaveAttendance(obj);
+                    }else {
+                        obj.leaveStatus = 3
+                        obj.holidayStatus  = 0
+                        await attendanceService.leaveAttendance(obj);
+                    }
+                }
+              }
+
+      }
+
+    }else {
+       //..more than one day present  
+    while (strDate < endDate){
+      var strDate = dateMove.toISOString().slice(0,10);
+      listDate.push(strDate);
+      dateMove.setDate(dateMove.getDate()+1);
+    };
+
+    if (listDate.length == 0){
+
+        console.log('today only');
+        //..current Day Attendance with Leave
         obj.userID = params.userID
         obj.startDate = startDate
         obj.leaveType = params.leaveType
@@ -105,6 +201,8 @@ async function create(params) {
         if(dateIsInWeekend==true){
 
             obj.holidayStatus  = 1
+            obj.leaveStatus = 3
+            //cross check if user had leave or not 
             await attendanceService.leaveAttendance(obj);
            
         } else {
@@ -117,9 +215,11 @@ async function create(params) {
 
             //  let status = newArray.indexOf(startDate) 
             if (newArray.includes(startDate)) {
+                obj.leaveStatus = 3
                 obj.holidayStatus  = 2
                 await attendanceService.leaveAttendance(obj);
             }else {
+                obj.leaveStatus = 3
                 obj.holidayStatus  = 0
                 await attendanceService.leaveAttendance(obj);
             }
@@ -129,13 +229,6 @@ async function create(params) {
 
     }else {
 
-
-
-    while (strDate < endDate){
-      var strDate = dateMove.toISOString().slice(0,10);
-      listDate.push(strDate);
-      dateMove.setDate(dateMove.getDate()+1);
-    };
     for (let i = 0; i < listDate.length; i++) { 
         var startDate = listDate[i]
 
@@ -143,14 +236,14 @@ async function create(params) {
         obj.startDate = startDate
         obj.leaveType = params.leaveType
 
-
-     var startDate = listDate[i]
+        var startDate = listDate[i]
         var givenDate = new Date(startDate);
         var currentDay = givenDate.getDay();
         var dateIsInWeekend = (currentDay === 6) || (currentDay === 0);
         if(dateIsInWeekend==true){
 
             obj.holidayStatus  = 1
+            obj.leaveStatus = 3
             await attendanceService.leaveAttendance(obj);
            
         } else {
@@ -160,25 +253,21 @@ async function create(params) {
            let holiday = users[i].holidayDate; 
             newArray.push(holiday);
              }
-
-            //  let status = newArray.indexOf(startDate) 
-            if (newArray.includes(startDate)) {
+             if (newArray.includes(startDate)) {
                 obj.holidayStatus  = 2
+                obj.leaveStatus = 3
                 await attendanceService.leaveAttendance(obj);
             }else {
+                obj.leaveStatus = 3
                 obj.holidayStatus  = 0
                 await attendanceService.leaveAttendance(obj);
             }
-
-            
-        // await attendanceService.leaveAttendance(obj);
         }
+      }
     }
   }
 
-
-
-
+    // params.leaveStatus = 3
     params.holidayStatus = 1
     await db.Leave.create(params);
     //..send email to users  
@@ -195,16 +284,9 @@ async function create(params) {
        objc.leaveType = params.leaveType;
        objc.senderEmail = params.senderEmail;
        getsendLeave(objc)
-    //   await otpService.sendLeaveToEmail(objc);
-    //   await emailService.create(toEmail);
-    }
-
-//..update the leave after leave applyed 
-//.. user applied leave auto create leave pollicey 
   
-
+    }
 }
-
 
 async function getbyDate(userID,params) {
     let currentdate = params.startDate 
@@ -264,7 +346,6 @@ async function getbyDiffDate(userID,params) {
     
 }
 
-
 //...update userInfo
 async function update(userID, params) {
     let startDate = params.startDate
@@ -276,61 +357,57 @@ async function update(userID, params) {
     return omitHash(user.get());
 }
 
-
 async function approvedLeave(userID, params) {
-   
    //approved Leave 
-//    console.log('this messageCalling');
+   console.log('this is message');
     let startDate = params.startDate
     let startDateFrm = params.startDate
-    // console.log('mesage is done ',startDate);
+    let objcCompoOff = {};
     const user = await getUserIDDate(userID,startDate);
     Object.assign(user, params);
     await user.save();
-
-    //leave approved 
-    // await attendanceService.leaveAttendance(obj);
-
     var listDate = [];
     var obj = {};
     var endDate = params.endDate;
     var dateMove = new Date(startDate);
     var strDate = startDate;
-
-    if (params.leaveType == 3){
-
-        obj.userID = params.userID
+    obj.userID = params.userID
         obj.startDate = strDate
         obj.leaveType = params.leaveType
         obj.leaveStatus = params.leaveStatus
         obj.holidayStatus = params.holidayStatus
-        await attendanceService.updateLeaveAtd(obj);
-
-
-    }else {
-    
-    while (strDate < endDate){
-      var strDate = dateMove.toISOString().slice(0,10);
-      listDate.push(strDate);
-      dateMove.setDate(dateMove.getDate()+1);
-    };
-    for (let i = 0; i < listDate.length; i++) { 
-       let startDate = listDate[i]
-        console.log('message',startDate);
-        obj.userID = params.userID
-        obj.startDate = startDate
-        obj.leaveType = params.leaveType
-        obj.leaveStatus = params.leaveStatus
-        obj.holidayStatus = params.holidayStatus
-        await attendanceService.updateLeaveAtd(obj);
-
-        // await attendanceService.leaveAttendance(obj);
-    }
-    }
-
-
+     while (strDate < endDate){
+            var strDate = dateMove.toISOString().slice(0,10);
+            listDate.push(strDate);
+            dateMove.setDate(dateMove.getDate()+1);
+         };
+         if (listDate.length == 0){
+            await attendanceService.updateLeaveAtd(obj);
+            
+         }else {
+            for (let i = 0; i < listDate.length; i++) { 
+                let startDate = listDate[i]
+                 console.log('message',startDate);
+                 obj.userID = params.userID
+                 obj.startDate = startDate
+                 obj.leaveType = params.leaveType
+                 obj.leaveStatus = params.leaveStatus
+                 obj.holidayStatus = params.holidayStatus
+                 await attendanceService.updateLeaveAtd(obj);
+                
+  
+                }
+            }
+       
+      if (params.leaveType == 4){
+        objcCompoOff.userID = params.userID;
+        objcCompoOff.resonOf =  user.titleType;
+        objcCompoOff.applydate =  params.startDate;
+        compoOffService.create(objcCompoOff);
+      }
 
     return omitHash(user.get());
+
 }
 
 async function _delete(userID,params) {
@@ -348,11 +425,9 @@ async function _deleteAll(userID) {
         await users.destroy();
         
     }
-
 }
 
 // helper functions
-
 async function getUser(id) {
     const user = await db.Leave.findByPk(id);
     if (!user) throw 'User not found';
@@ -385,12 +460,116 @@ function omitHash(user) {
     return userWithoutHash;
 }
 
+//leavemanagment 
+
+async function compareLeavemanagement(params) {
+
+    let userID = params.userID;
+    var listDate = [];
+    let newArray = [];
+    var obj = {}
+    var startDate =params.startDate;
+    var endDate = params.endDate;
+    var dateMove = new Date(startDate);
+    var strDate = startDate;
+    let LeaveApplyDate  = params.startDate;
+    let objc = {};
+    let CountInc = 0
+
+    while (strDate < endDate){
+      var strDate = dateMove.toISOString().slice(0,10);
+      listDate.push(strDate);
+      dateMove.setDate(dateMove.getDate()+1);
+    };
+
+    if (listDate.length == 0){
+ 
+        obj.userID = params.userID
+        obj.startDate = startDate
+        obj.leaveType = params.leaveType
+
+        var givenDate = new Date(startDate);
+        var currentDay = givenDate.getDay();
+        var dateIsInWeekend = (currentDay === 6) || (currentDay === 0);
+        if(dateIsInWeekend==true){
+           
+        } else {
+          let status = 0
+           let users = await db.Holiday.findAll()
+           for (let i = 0; i < users.length; i++) { 
+           let holiday = users[i].holidayDate; 
+            newArray.push(holiday);
+             }
+            if (newArray.includes(startDate)) {
+
+            }else {
+                CountInc = CountInc + 1;
+            }
+        }
+    }else {
+    for (let i = 0; i < listDate.length; i++) { 
+        var startDate = listDate[i]
+        obj.userID = params.userID
+        obj.startDate = startDate
+        obj.leaveType = params.leaveType
+
+        var startDate = listDate[i]
+        var givenDate = new Date(startDate);
+        var currentDay = givenDate.getDay();
+        var dateIsInWeekend = (currentDay === 6) || (currentDay === 0);
+        if(dateIsInWeekend==true){
+           
+        } else {
+          let status = 0
+           let users = await db.Holiday.findAll()
+           for (let i = 0; i < users.length; i++) { 
+           let holiday = users[i].holidayDate; 
+            newArray.push(holiday);
+             }
+             if (newArray.includes(startDate)) {
+                
+            }else {
+                obj.leaveStatus = 3
+                obj.holidayStatus  = 0
+                CountInc = CountInc + 1;
+            }
+        }
+      }
+  }
+
+  const userleave = await db.LeaveManagment.findOne({ where: { userID:params.userID} });
+  let data = [];
+  if (params.leaveType == 1){
+    if (userleave.casualLeaves >= CountInc){
+        data = {
+            "message":"user had leaves",
+            "success":200
+        }
+      } 
+   }else {
+    data = {
+        "message":"No leaves",
+        "success":400
+    }
+   }
+   if (params.leaveType == 2) {
+    if (userleave.sickLeaves >= CountInc){
+        data = {
+            "message":"user had leaves",
+            "success":200
+        }
+    } 
+ }else {
+    data = {
+        "message":"No leaves",
+        "success":400
+    }
+ }
+   return data;
+}
 
 async function getsendLeave(params) {
-    // const user = await db.Leave.findOne({ where: { userID: userID } })
-    // if (!user) throw 'User not found';
-    // return user;
-
+ 
     let testAcc = {
         user: "nagaraju.kankanala@sevenchats.com",
         pass: "Omsairam@12345",
@@ -423,5 +602,4 @@ async function getsendLeave(params) {
           console.error(err.message);
         });
     
-
 }

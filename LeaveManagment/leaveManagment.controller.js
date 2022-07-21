@@ -6,21 +6,15 @@ const authorize = require('_middleware/authorize')
 const userService = require('./leaveManagment.service');
 const usershortid  = require("shortid");
 
-// routes
-// router.post('/login', authenticateSchema, authenticate);
-
-
 router.post('/addLeaves',authorize(),registerSchema,addLeaves);
 router.get('/getallLeaves', getAll);
 router.get('/getbyUserLeave', getById);
 router.put('/userLeaveUpdate', updateSchema, update);
 router.delete('/userLeaveDelete', _delete);
-// router.put('/userAtdLeaveupdate', updateSchema,userAtdLeaveupdate);
+
 
 module.exports = router;
-//...loginwith email id 
 
-//...Getall Users
 function getEmails(req, res, next) {
     userService.getAll()
         .then(users => res.json(
@@ -33,8 +27,6 @@ function getEmails(req, res, next) {
         .catch(next);
 }
 
-
-
 function getAll(req, res, next) {
     userService.getAll()
         .then(users => res.json(
@@ -46,6 +38,8 @@ function getAll(req, res, next) {
         ))
         .catch(next);
 }
+
+
 function registerSchema(req, res, next) {
     const schema = Joi.object({
         userID: Joi.number().required(),

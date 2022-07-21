@@ -11,6 +11,7 @@ const usershortid  = require("shortid");
 
 router.post('/applyLeave',authorize(), applyLeaveModel, applyLeaves);
 router.get('/getAllLeave',authorize(), getLeaves);
+router.post('/compareLvm', authorize(), compareLeave);
 router.get('/getLeavebyID',authorize(), getLeavesbyID);
 router.get('/getLeavebydate',authorize(), getLeavesbyDate);
 router.get('/getLeavebyDiff',authorize(), getLeavesDiffDate);
@@ -18,6 +19,8 @@ router.put('/updateLeave', authorize(), updateSchema, update);
 router.put('/approveLeave', authorize(), approveLeave);
 router.delete('/deleteLeave', authorize(), _delete);
 router.delete('/deleteAll', authorize(), deleteAll);
+
+
 
 
 module.exports = router;
@@ -126,6 +129,14 @@ function _delete(req, res, next) {
 function deleteAll(req, res, next) {
     userService.deleteAll(req.body.userID)
         .then(() => res.json({ message: 'User deleted successfully' }))
+        .catch(next);
+}
+
+
+function compareLeave(req, res, next) {
+    userService.compareLeavemanagement(req.body)
+   
+        .then(data => res.json({data}))
         .catch(next);
 }
 

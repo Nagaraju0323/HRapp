@@ -18,10 +18,12 @@ router.get('/userDeatils', authorize(), getByUser);
 router.get('/:id', authorize(), getById);
 router.put('/resetPassword', authorize(),resetPassword);
 router.put('/userupdate', authorize(), updateSchema, userupdate);
+router.put('/profilePicupdate', authorize(), userprofileupdate);
 router.delete('/deleteuser', authorize(), user_delete);
 router.post('/forgotpassword', forgotPassword);
 router.post('/sentOtptoemail', sentOtptoemail);
-router.post('/resentOtptoemail', resentOtptoemail);
+router.post('/sentOtptoMobile', sentOtptoMobile);
+// router.post('/resentOtptoemail', resentOtptoMobile);
 router.post('/validateOtp', validateOtp);
 router.post('/updateUserDetails', updateUserDetails);
 
@@ -145,10 +147,16 @@ function userupdate(req, res, next) {
         .then(user => res.json(user))
         .catch(next);
 }
+
+function userprofileupdate(req, res, next) {
+    userService.userupdateID(req.body.userID,req.body)
+        .then(user => res.json(user))
+        .catch(next);
+}
 //..update BankDetails 
 
 function updateUserDetails(req, res, next) {
-    userService.updateuserBank(req.body.userID, req.body)
+    userService.userprofileUpdate(req.body.userID,req.body)
         .then(user => res.json(user))
         .catch(next);
 }
@@ -187,9 +195,9 @@ function sentOtptoemail(req, res, next) {
         .catch(next);
 }
 
-function resentOtptoemail(req, res, next) {
+function sentOtptoMobile(req, res, next) {
 
-    userService.forgotpassword(req.body)
+    userService.sendOtpToMobile(req.body)
         .then(() => res.json({ message: 'send link email successfully' }))
         .catch(next);
 }

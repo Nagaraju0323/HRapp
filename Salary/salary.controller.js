@@ -11,10 +11,10 @@ const usershortid  = require("shortid");
 
 
 router.post('/addCTC',authorize(),registerSchema,addCTC);
-router.get('/getallLeaves', getAll);
-router.get('/getbyUserLeave', getById);
-router.put('/userLeaveUpdate', updateSchema, update);
-router.delete('/userLeaveDelete', _delete);
+router.get('/getallsalary',authorize(), getAll);
+router.get('/getbysalary',authorize(), getById);
+router.put('/salaryeUpdate',authorize(), updateSchema, update);
+router.delete('/salaryeDelete',authorize(), _delete);
 
 module.exports = router;
 //...loginwith email id 
@@ -51,10 +51,12 @@ function registerSchema(req, res, next) {
         basicPay: Joi.number().required(),
         hra:Joi.number().required(),
         specialAllowance : Joi.number().required(),
+        Conveyance: Joi.number().required(),
         travelAllowance: Joi.number().required(),
         Esi: Joi.number().required(),
         employeerPF: Joi.number().required(),
         employeePF: Joi.number().required(),
+        ctc: Joi.number().required(),
         
     });
     validateRequest(req, next, schema);
@@ -64,7 +66,7 @@ function registerSchema(req, res, next) {
 //..eventAdd
 function addCTC(req, res, next) {
     userService.create(req.body)
-        .then(() => res.json({ message: 'Leaves Add' }))
+        .then(() => res.json({ message: 'Employee Salary Addedd' }))
         .catch(next);
 }
 function getById(req, res, next) {
@@ -79,10 +81,12 @@ function updateSchema(req, res, next) {
         basicPay: Joi.number().required(),
         hra:Joi.number().required(),
         specialAllowance : Joi.number().required(),
+        Conveyance: Joi.number().required(),
         travelAllowance: Joi.number().required(),
         Esi: Joi.number().required(),
         employeerPF: Joi.number().required(),
         employeePF: Joi.number().required(),
+        ctc: Joi.number().required(),
     });
     validateRequest(req, next, schema);
 }
