@@ -16,6 +16,9 @@ const puppeteer = require("puppeteer");
 const handlebars = require("handlebars");
 var html_to_pdf = require('html-to-pdf');
 const { param } = require('./salslips.controller');
+var b64toBlob = require('b64-to-blob');
+const axios = require('axios').default;
+
 
 let data = [];
 module.exports = {
@@ -204,33 +207,12 @@ async function getgenerateSlips(params) {
           const contentType = 'application/pdf';
           const b64Data = response ;
           const blob = b64toBlob(b64Data, contentType);
-          // console.log('blobmessage',blob);
-          const blobUrl = URL.createObjectURL(blob);
-           objc.salarySlips = blobUrl;
-           db.SalSlips.create(objc);
-
-
-
-          // var base64EncodedPDF = response; // the encoded string
-          // var decodedPdfContent = atob(base64EncodedPDF);
-          // var byteArray = new Uint8Array(decodedPdfContent.length)
-          // for(var i=0; i<decodedPdfContent.length; i++){
-          //     byteArray[i] = decodedPdfContent.charCodeAt(i);
-          // }
-          // var blob = new Blob([byteArray.buffer], { type: 'application/pdf' });
-          // var _pdfurl = URL.createObjectURL(blob);
-          // console.log('pdfFormat',_pdfurl);
-
-          // const base64String = await convertBlobToBase64(blob);
-
-          // convertBlobToBase64 = (blob) => new Promise((resolve, reject) => {
-          //   const reader = new FileReader;
-          //   reader.onerror = reject;
-          //   reader.onload = () => {
-          //       resolve(reader.result);
-          //   };
-          //   reader.readAsDataURL(blob);
-          // });
+          console.log('blobmessage',blob);
+          const blobUrl = global.URL.createObjectURL(blob);
+          console.log('blobmessage',blobUrl);
+          //  console.log('blobmessage',blobUrl);
+          //  objc.salarySlips = blobUrl;
+          //  db.SalSlips.create(objc);
 
 
       }
@@ -268,45 +250,6 @@ async function html_to_pdfs(templateHtml, dataBinding, options) {
   
 }
 
-const b64toBlob = (b64Data, contentType='', sliceSize=512) => {
-  const byteCharacters = atob(b64Data);
-  const byteArrays = [];
-
-  for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
-    const slice = byteCharacters.slice(offset, offset + sliceSize);
-
-    const byteNumbers = new Array(slice.length);
-    for (let i = 0; i < slice.length; i++) {
-      byteNumbers[i] = slice.charCodeAt(i);
-    }
-
-    const byteArray = new Uint8Array(byteNumbers);
-    byteArrays.push(byteArray);
-  }
-
-  const blob = new Blob(byteArrays, {type: contentType});
-  return blob;
-}
-
-// const blobToBase64 = (url) => {
-//   return new Promise((resolve, _) => {
-//     // do a request to the blob uri
-//     const response = await fetch(url);
-
-//     // response has a method called .blob() to get the blob file
-//     const blob = await response.blob();
-
-//     // instantiate a file reader
-//     const fileReader = new FileReader();
-
-//     // read the file
-//     fileReader.readAsDataURL(blob);
-
-//     fileReader.onloadend = function(){
-//       resolve(fileReader.result); // Here is the base64 string
-//     }
-//   });
-// };
 
 
 async function downloadSalSlips(params) {
@@ -328,23 +271,27 @@ const convertBlobToBase64 = async (blob) => { // blob data
 const blobToBase64 = blob => new Promise((resolve, reject) => {
   
 // console.log('blobtobase64');
-  const reader = new FileReader();
+  const reader = fs.FileReader();
   reader.readAsDataURL(blob);
   console.log('blobtobase64',blob);
   reader.onload = () => resolve(reader.result);
   reader.onerror = error => reject(error);
 });
 
+
+
+
 async function DeletePdfFile(params){
   
 
 }
 
-// convertBlobToBase64 = (blob) => new Promise((resolve, reject) => {
-//   const reader = new FileReader;
-//   reader.onerror = reject;
-//   reader.onload = () => {
-//       resolve(reader.result);
-//   };
-//   reader.readAsDataURL(blob);
-// });
+
+
+function base64_encode(file) {
+  // read binary data
+  var bitmap = fs.readFileSync(file);
+  // convert binary data to base64 encoded string
+  return new Buffer(bitmap).toString('base64');
+}
+

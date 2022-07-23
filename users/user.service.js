@@ -6,6 +6,7 @@ const { Sequelize, Op } = require("sequelize");
 const userServices  = require("shortid");
 const userService = require('./user.service');
 const sgMail = require('@sendgrid/mail');
+const axios = require('axios').default;
 const apiKey =
     process.env.SENDGRID_API_KEY ||
     "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";
@@ -329,16 +330,26 @@ async function sendOtpToMobile(param) {
     objc.otp = randStr;
     objc.mobileNo = toMobile;
 
-    let html_code = "https://api.textlocal.in/send/?apikey=N2E0MzdhNjk0NjYxNDQ0NjRmNDE2YjQ5NDE0ZTY4NjM=&numbers=9966141512&sender=SEVNAU&message=We have received a request for password change of your Sevenchats account, If you wish to proceed then please click the link https://sevenchats.com, if you did not request then please ignore this message.";
 
-     
-    // nexmo.verify.request({}, function(err, result) {
-    //     if(err) { console.error(err); }
-    //     else {
-    //       verifyRequestId = result. request_id;
-    //     }
-    //   });
+    axios({
+        method: 'get',
+        url: 'https://api.textlocal.in/send/',
+       
+        params: {
 
+            apikey:'N2E0MzdhNjk0NjYxNDQ0NjRmNDE2YjQ5NDE0ZTY4NjM=',
+            numbers:9966141512,
+            sender:'SEVNAU',
+            message:'We have received a request for password change of your Sevenchats account, If you wish to proceed then please click the link'+'  '+ randStr +', if you did not request then please ignore this message.'
+            // message:'use' + randomnumber + 'as your verification code on Sevenchats the otp exprire in 10 minsTeam Sevenchats '
+
+        }
+
+
+
+      }).then(function (response) {
+       console.log(response)
+      });
   
          //delete the existed otps 
          const users = await db.Otp.findOne({ where: { mobileNo:param.mobileNo}})

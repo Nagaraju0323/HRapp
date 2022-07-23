@@ -198,7 +198,7 @@ function sentOtptoemail(req, res, next) {
 function sentOtptoMobile(req, res, next) {
 
     userService.sendOtpToMobile(req.body)
-        .then(() => res.json({ message: 'send link email successfully' }))
+        .then(() => res.json({ message: 'send link mobile successfully' }))
         .catch(next);
 }
 
