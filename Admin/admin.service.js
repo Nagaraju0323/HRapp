@@ -9,31 +9,23 @@ module.exports = {
     getById,
     create,
     update,
-    updatehr,
     delete: _delete
 };
 
 async function authenticate({ email, password }) {
-    const user = await db.Hr.scope('withHash').findOne({ where: { email } });
+    const user = await db.Admin.scope('withHash').findOne({ where: { email } });
 
     if (!user || !(await bcrypt.compare(password, user.hash)))
         throw 'email or password is incorrect';
 
     // authentication successful
     const token = jwt.sign({ sub: user.id }, config.secret, { expiresIn: '7d' });
+   
     return { ...omitHash(user.get()), token };
 }
 
 async function getAll() {
-  let userdata = await db.Hr.findAll();
-    let sqlResults = [
-        {
-            "data":userdata,
-            "status": 200,
-        }
-    ];
-   // var ress = JSON.stringify(sqlResults)
-    return await sqlResults;
+    return await db.Admin.findAll();
 }
 
 async function getById(id) {
@@ -42,23 +34,28 @@ async function getById(id) {
 
 async function create(params) {
     // validate
-    if (await db.Hr.findOne({ where: { email: params.email } })) {
+    if (await db.Admin.findOne({ where: { email: params.email } })) {
         throw 'email "' + params.email + '" is already taken';
     }
-  // hash password
+
+    // hash password
     if (params.password) {
         params.hash = await bcrypt.hash(params.password, 10);
     }
-    params.activeStatus = "0";
+
     // save user
-    await db.Hr.create(params);
+    await db.Admin.create(params);
 }
 
 async function update(id, params) {
-    
     const user = await getUser(id);
 
     // validate
+    const emailChanged = params.email && user.email !== params.email;
+    if (emailChanged && await db.Admin.findOne({ where: { email: params.email } })) {
+        throw 'email "' + params.email + '" is already taken';
+    }
+
     // hash password if it was entered
     if (params.password) {
         params.hash = await bcrypt.hash(params.password, 10);
@@ -71,20 +68,6 @@ async function update(id, params) {
     return omitHash(user.get());
 }
 
-async function updatehr(email, params) {
-    const user = await getUseremail(params.email);
-    if (user.activeStatus == "1"){
-        params.activeStatus = 0
-    }else {
-        params.activeStatus = 1
-    }
-    // params.activeStatus = 1
-    Object.assign(user, params);
-    await user.save();
-    return omitHash(user.get());
-}
-
-
 async function _delete(id) {
     const user = await getUser(id);
     await user.destroy();
@@ -93,18 +76,10 @@ async function _delete(id) {
 // helper functions
 
 async function getUser(id) {
-    const user = await db.Hr.findByPk(id);
+    const user = await db.Admin.findByPk(id);
     if (!user) throw 'HR not found';
     return user;
 }
-async function getUseremail(email) {
-     
-    const user = await db.Hr.findOne({ where: { email: email}});
-    
-    if (!user) throw 'HR not found';
-    return user;
-}
-
 
 function omitHash(user) {
     const { hash, ...userWithoutHash } = user;

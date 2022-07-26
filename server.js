@@ -37,6 +37,8 @@ app.use('/SalSlips', require('./SalSlips/salslips.controller'));
 
 app.use('/Compoff', require('./Compoff/compoff.controller'));
 
+app.use('/Admin', require('./Admin/admin.controller'));
+
 
 
 

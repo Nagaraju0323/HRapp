@@ -3,16 +3,14 @@ const router = express.Router();
 const Joi = require('joi');
 const validateRequest = require('_middleware/validate-request');
 const authorize = require('_middleware/authorize')
-const userService = require('./hr.service');
+const userService = require('./admin.service');
 
 // routes
-router.post('/authenticate', authenticateSchema, authenticate);
-router.post('/register', registerSchema, register);
-router.get('/hrdetails', authorize(), getAll);
+router.post('/AdminLogin', authenticateSchema, authenticate);
+router.post('/Adminregister', registerSchema, register);
+router.get('/', authorize(), getAll);
 router.get('/current', authorize(), getCurrent);
 router.get('/:id', authorize(), getById);
-router.put('/activateHr', authorize(), updateSchemaHr, updateHr);
-
 router.put('/:id', authorize(), updateSchema, update);
 router.delete('/:id', authorize(), _delete);
 
@@ -74,22 +72,8 @@ function updateSchema(req, res, next) {
     validateRequest(req, next, schema);
 }
 
-function updateSchemaHr(req, res, next) {
-    const schema = Joi.object({
-      email: Joi.string().empty(''),
-    });
-    validateRequest(req, next, schema);
-}
-
 function update(req, res, next) {
     userService.update(req.params.id, req.body)
-        .then(user => res.json(user))
-        .catch(next);
-}
-
-
-function updateHr(req, res, next) {
-    userService.updatehr(req.params.email, req.body)
         .then(user => res.json(user))
         .catch(next);
 }

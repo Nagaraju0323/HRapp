@@ -67,7 +67,13 @@ async function authenticatetoMobile({ mobileNo, password }) {
 
 //...GetAll UserInformation
 async function getAll() {
-    return await db.User.findAll();
+    let data = [];
+    let users = await db.User.findAll()
+    data = {
+        "data": users,
+        status : 200
+     }
+    return data;
 }
 //...search with UserInformation
 async function getAlls(search) {

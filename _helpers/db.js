@@ -29,6 +29,7 @@ async function initialize() {
     db.Salary = require('../Salary/salary.model')(sequelize);
     db.SalSlips = require('../SalSlips/salslips.model')(sequelize);
     db.Compoff = require('../Compoff/compoff.model')(sequelize);
+    db.Admin = require('../Admin/admin.model')(sequelize);
    
     // db.Attendace.removeAttribute('id');
 

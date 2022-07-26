@@ -7,7 +7,6 @@ function model(sequelize) {
         firstName: { type: DataTypes.STRING, allowNull: false },
         lastName: { type: DataTypes.STRING, allowNull: false },
         // username: { type: DataTypes.STRING, allowNull: false },
-        activeStatus: { type: DataTypes.STRING, allowNull: false },
         email: { type: DataTypes.STRING, allowNull: false },
         hash: { type: DataTypes.STRING, allowNull: false }
     };
@@ -23,5 +22,5 @@ function model(sequelize) {
         }
     };
 
-    return sequelize.define('Hr', attributes, options);
+    return sequelize.define('Admin', attributes, options);
 }
