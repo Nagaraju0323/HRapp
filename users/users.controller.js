@@ -5,7 +5,9 @@ const validateRequest = require('_middleware/validate-request');
 const authorize = require('_middleware/authorize')
 const userService = require('./user.service');
 const usershortid  = require("shortid");
-
+const mutler = require('multer');
+const DIR = './uploads';
+const {successResponse} = require('../_middleware/error-handler')
 
 // routes
 router.post('/logintoEmail', authenticateSchema, authenticate);
@@ -25,7 +27,11 @@ router.post('/sentOtptoemail', sentOtptoemail);
 router.post('/sentOtptoMobile', sentOtptoMobile);
 // router.post('/resentOtptoemail', resentOtptoMobile);
 router.post('/validateOtp', validateOtp);
+router.post('/validateMobileOtp', validateMobileOtp);
+router.post('/uploadPics', uploadImgpic);
 router.post('/updateUserDetails', updateUserDetails);
+router.post('/sentOtpemailPWD', sentOtptemailPWD);
+router.post('/sentOtpmobilePWD', sentOtpmobilePWD);
 
 module.exports = router;
 //...loginwith email id 
@@ -39,7 +45,8 @@ function authenticateSchema(req, res, next) {
 
 function authenticate(req, res, next) {
     userService.authenticate(req.body)
-        .then(user => res.json(user))
+        // .then(user => res.json(user))
+        .then(users => successResponse(res,users,0,'success'))
         .catch(next);
 }
 
@@ -53,7 +60,8 @@ function authenticateSchemamobile(req, res, next) {
 
 function authenticatemobile(req, res, next) {
     userService.authenticatetoMobile(req.body)
-        .then(user => res.json(user))
+        // .then(user => res.json(user))
+        .then(users => successResponse(res,users,0,'success'))
         .catch(next);
 }
 
@@ -80,7 +88,8 @@ function registerSchema(req, res, next) {
 
 function register(req, res, next) {
     userService.create(req.body)
-        .then(() => res.json({ message: 'Registration successful' }))
+    .then(users => successResponse(res,users,0,'success'))
+        // .then(() => res.json({ message: 'Registration successful' }))
         .catch(next);
 }
 
@@ -88,6 +97,7 @@ function register(req, res, next) {
 function getAll(req, res, next) {
     userService.getAll()
         .then(users => res.json(users))
+        // .then(users => successResponse(res,users,0,'success'))
         .catch(next);
 }
 //...search By Users
@@ -191,18 +201,62 @@ function forgotPassword(req, res, next) {
 function sentOtptoemail(req, res, next) {
 
     userService.forgotpassword(req.body)
-        .then(() => res.json({ message: 'send link email successfully' }))
+        // .then(() => res.json({ message: 'send link email successfully' }))
+        .then(users => successResponse(res,users,0,'success'))
+        .catch(next);
+}
+
+
+//forgotPWD 
+
+
+function sentOtptemailPWD(req, res, next) {
+
+    userService.sendOTPforgot(req.body)
+        // .then(() => res.json({ message: 'send link email successfully' }))
+        .then(users => successResponse(res,users,0,'success'))
+        .catch(next);
+}
+
+
+
+
+
+function sentOtpmobilePWD(req, res, next) {
+console.log(req.body)
+    userService.sendOTPforgotMobile(req.body)
+        // .then(() => res.json({ message: 'send link mobile successfully' }))
+        .then(users => successResponse(res,users,0,'success'))
         .catch(next);
 }
 
 function sentOtptoMobile(req, res, next) {
+    console.log(req.body)
+        userService.sendOtpToMobile(req.body)
+            // .then(() => res.json({ message: 'send link mobile successfully' }))
+            .then(users => successResponse(res,users,0,'success'))
+            .catch(next);
+    }
 
-    userService.sendOtpToMobile(req.body)
-        .then(() => res.json({ message: 'send link mobile successfully' }))
+function validateOtp(req, res, next) {
+
+    userService.validOtp(req.body)
+        // .then(() => res.json({ message: 'Otp successful'}))
+        .then(users => successResponse(res,users,0,'success'))
         .catch(next);
 }
 
-function validateOtp(req, res, next) {
+function validateMobileOtp(req, res, next) {
+
+    userService.validMobileOtp(req.body)
+        // .then(() => res.json({ message: 'Otp successful'}))
+        .then(users => successResponse(res,users,0,'success'))
+        .catch(next);
+}
+
+
+
+function uploadImgpic(req, res, next) {
 
     userService.validOtp(req.body)
         .then(() => res.json({ message: 'Otp successful'}))

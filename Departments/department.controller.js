@@ -4,6 +4,7 @@ const Joi = require('joi');
 const validateRequest = require('_middleware/validate-request');
 const authorize = require('_middleware/authorize')
 const userService = require('./department.service');
+const {successResponse} = require('../_middleware/error-handler')
 
 // routes
 // router.post('/addDepartment', authenticateSchema, authenticate);
@@ -24,6 +25,8 @@ function authenticateSchema(req, res, next) {
     validateRequest(req, next, schema);
 }
 
+
+
 function authenticate(req, res, next) {
     userService.authenticate(req.body)
         .then(user => res.json(user))
@@ -38,15 +41,27 @@ function registerSchema(req, res, next) {
 }
 
 function register(req, res, next) {
+    let data = [];
+    
+    // sqlResults = [
+    //     {
+    //         message: 'Department Add successfully',
+    //         status:200
+    //     }
+    // ];
     userService.create(req.body)
-        .then(() => res.json({ message: 'Department Add successful' ,status:0}))
+        // .then(() => res.json({sqlResults}))
+        .then(users => successResponse(res,users,0,'success'))
         .catch(next);
+
+
+
 }
 
-function getAll(req, res, next) {
+function getAll(_req, res, next) {
   
     userService.getAll()
-        .then(users => res.json({ "data": users,status:0}))
+        .then(users => successResponse(res,users,0,'success'))
         .catch(next);
 }
 
@@ -56,7 +71,8 @@ function getCurrent(req, res, next) {
 
 function getById(req, res, next) {
     userService.getById(req.params.id)
-        .then(user => res.json(user))
+        // .then(user => res.json(user))
+        .then(users => successResponse(res,users,0,'success'))
         .catch(next);
 }
 
@@ -69,12 +85,13 @@ function updateSchema(req, res, next) {
 
 function update(req, res, next) {
     userService.update(req.params.id, req.body)
-        .then(user => res.json(user))
+        // .then(user => res.json(user))
+        .then(users => successResponse(res,users,0,'success'))
         .catch(next);
 }
 
 function _delete(req, res, next) {
     userService.delete(req.params.id)
-        .then(() => res.json({ message: 'Department deleted successfully' }))
+     .then(users => successResponse(res,users,0,'success'))
         .catch(next);
 }

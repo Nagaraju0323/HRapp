@@ -2,7 +2,7 @@ const config = require('config.json');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const db = require('_helpers/db');
-
+let data = [];
 module.exports = {
     authenticate,
     getAll,
@@ -35,9 +35,11 @@ async function getById(id) {
 async function create(params) {
     // validate
     if (await db.Departments.findOne({ where: { DepName: params.DepName } })) {
+        
         throw 'Department "' + params.DepName + '" is already taken';
+        // throw {error: "hello world"}
     }
-    // save user
+  
     await db.Departments.create(params);
 }
 

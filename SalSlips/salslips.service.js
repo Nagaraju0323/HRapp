@@ -18,6 +18,7 @@ var html_to_pdf = require('html-to-pdf');
 const { param } = require('./salslips.controller');
 var b64toBlob = require('b64-to-blob');
 const axios = require('axios').default;
+const Jimp = require("jimp");
 
 
 let data = [];
@@ -206,14 +207,20 @@ async function getgenerateSlips(params) {
           objc.salaryyear = params.year;
           const contentType = 'application/pdf';
           const b64Data = response ;
-          const blob = b64toBlob(b64Data, contentType);
-          console.log('blobmessage',blob);
-          const blobUrl = global.URL.createObjectURL(blob);
-          console.log('blobmessage',blobUrl);
-          //  console.log('blobmessage',blobUrl);
-          //  objc.salarySlips = blobUrl;
-          //  db.SalSlips.create(objc);
+          // const blob = b64toBlob(b64Data, contentType);
+          // console.log('blobmessage',blob);
+          // const blobUrl = global.URL.createObjectURL(blob);
+          // console.log('blobmessage',blobUrl);
+         
+          const data = response;
+        // Convert base64 to buffer => <Buffer ff d8 ff db 00 43 00 ...
+        const buffer = Buffer.from(data, "base64");
+        Jimp.read(buffer, (err, res) => {
+          if (err) throw new Error(err);
+          let image = res.quality(5).write("resized.jpg");
+          console.log(image);
 
+        });
 
       }
   )
