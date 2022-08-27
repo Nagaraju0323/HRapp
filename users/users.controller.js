@@ -22,16 +22,16 @@ router.put('/resetPassword', authorize(),resetPassword);
 router.put('/userupdate', authorize(), updateSchema, userupdate);
 router.put('/profilePicupdate', authorize(), userprofileupdate);
 router.delete('/deleteuser', authorize(), user_delete);
-router.post('/forgotpassword', forgotPassword);
 router.post('/sentOtptoemail', sentOtptoemail);
 router.post('/sentOtptoMobile', sentOtptoMobile);
-// router.post('/resentOtptoemail', resentOtptoMobile);
 router.post('/validateOtp', validateOtp);
 router.post('/validateMobileOtp', validateMobileOtp);
 router.post('/uploadPics', uploadImgpic);
 router.post('/updateUserDetails', updateUserDetails);
 router.post('/sentOtpemailPWD', sentOtptemailPWD);
 router.post('/sentOtpmobilePWD', sentOtpmobilePWD);
+router.post('/changePWDemail', changePWDemail);
+router.post('/changePWDmobile', changePWDmobile);
 
 module.exports = router;
 //...loginwith email id 
@@ -172,8 +172,6 @@ function updateUserDetails(req, res, next) {
 }
 
 
-
-
 //...Reset Password
 function resetPassword(req, res, next) {
     console.log('this is claling')
@@ -182,6 +180,23 @@ function resetPassword(req, res, next) {
         .then(user => res.json(user))
         .catch(next);
 }
+//change PWD
+function changePWDemail(req, res, next) {
+    console.log('this is claling')
+    const id = req.params.userID;
+    userService.changePWDemail(req.body)
+    .then(users => successResponse(res,users,0,'success'))
+        .catch(next);
+}
+//change PWD mobile 
+function changePWDmobile(req, res, next) {
+    console.log('this is claling')
+    const id = req.params.userID;
+    userService.changePWDmobile(req.body)
+    .then(users => successResponse(res,users,0,'success'))
+        .catch(next);
+}
+
 
 //...Delete user
 function user_delete(req, res, next) {
@@ -191,16 +206,16 @@ function user_delete(req, res, next) {
 }
 
 //...Delete user
-function forgotPassword(req, res, next) {
+// function forgotPassword(req, res, next) {
 
-    userService.forgotpassword(req.body)
-        .then(() => res.json({ message: 'send link email successfully' }))
-        .catch(next);
-}
+//     userService.forgotpassword(req.body)
+//         .then(() => res.json({ message: 'send link email successfully' }))
+//         .catch(next);
+// }
 
 function sentOtptoemail(req, res, next) {
 
-    userService.forgotpassword(req.body)
+    userService.sentOtptoemail(req.body)
         // .then(() => res.json({ message: 'send link email successfully' }))
         .then(users => successResponse(res,users,0,'success'))
         .catch(next);
@@ -217,9 +232,6 @@ function sentOtptemailPWD(req, res, next) {
         .then(users => successResponse(res,users,0,'success'))
         .catch(next);
 }
-
-
-
 
 
 function sentOtpmobilePWD(req, res, next) {
@@ -253,8 +265,6 @@ function validateMobileOtp(req, res, next) {
         .then(users => successResponse(res,users,0,'success'))
         .catch(next);
 }
-
-
 
 function uploadImgpic(req, res, next) {
 

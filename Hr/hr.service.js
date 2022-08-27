@@ -5,6 +5,7 @@ const db = require('_helpers/db');
 
 module.exports = {
     authenticate,
+    authenticateMobile,
     getAll,
     getById,
     create,
@@ -15,6 +16,18 @@ module.exports = {
 
 async function authenticate({ email, password }) {
     const user = await db.Hr.scope('withHash').findOne({ where: { email } });
+
+    if (!user || !(await bcrypt.compare(password, user.hash)))
+        throw 'email or password is incorrect';
+
+    // authentication successful
+    const token = jwt.sign({ sub: user.id }, config.secret, { expiresIn: '7d' });
+    return { ...omitHash(user.get()), token };
+}
+
+
+async function authenticateMobile({ mobileNo, password }) {
+    const user = await db.Hr.scope('withHash').findOne({ where: { mobileNo } });
 
     if (!user || !(await bcrypt.compare(password, user.hash)))
         throw 'email or password is incorrect';
@@ -49,6 +62,10 @@ async function create(params) {
     if (params.password) {
         params.hash = await bcrypt.hash(params.password, 10);
     }
+    var rand = Math.floor(Math.random() * 1000000);
+    var randStr = rand
+    params.userID = randStr
+
     params.activeStatus = "0";
     // save user
     await db.Hr.create(params);
@@ -110,3 +127,5 @@ function omitHash(user) {
     const { hash, ...userWithoutHash } = user;
     return userWithoutHash;
 }
+
+

@@ -8,7 +8,8 @@ function errorHandler(err, req, res, next) {
             // custom application error
             const is404 = err.toLowerCase().endsWith('not found');
             const statusCode = is404 ? 404 : 400;
-            return res.status(statusCode).json({data:[],meta:{statusCode:statusCode,message: err} });
+            let datas = [];
+            return res.status(statusCode).json({data:datas,meta:{statusCode:statusCode,message: err} });
         case err.name === 'UnauthorizedError':
             // jwt authentication error
             const statusCodes = 401;

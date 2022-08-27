@@ -4,7 +4,7 @@ const bcrypt = require('bcryptjs');
 const db = require('_helpers/db');
 const { Sequelize, Op } = require("sequelize");
 const userServices  = require("shortid");
-const userService = require('./user.service');
+// const userService = require('./user.service');
 const sgMail = require('@sendgrid/mail');
 const axios = require('axios').default;
 const apiKey =
@@ -30,7 +30,7 @@ module.exports = {
     userupdateID,
     userprofileUpdate,
     user_delete,
-    forgotpassword,
+    sentOtptoemail,
     validOtp,
     updateuserBank,
     sendOtpToMobile,
@@ -38,7 +38,9 @@ module.exports = {
     uploadProfileImg,
     validMobileOtp,
     sendOTPforgot,
-    sendOTPforgotMobile
+    sendOTPforgotMobile,
+    changePWDemail,
+    changePWDmobile
     
 };
 
@@ -47,6 +49,7 @@ async function authenticate({ email, password }) {
   
     const user = await db.User.scope('withHash').findOne({ where: { email } });
     
+    console.log('user---------',user)
     if (!user || !(await bcrypt.compare(password, user.hash)))
         throw 'email or password is incorrect';
 
@@ -59,6 +62,7 @@ async function authenticate({ email, password }) {
 async function authenticatetoMobile({ mobileNo, password }) {
   
     const user = await db.User.scope('withHash').findOne({ where: { mobileNo } });
+    console.log('user---------',user)
 
     if (!user || !(await bcrypt.compare(password, user.hash)))
         throw 'email or password is incorrect';
@@ -193,9 +197,8 @@ async function userupdateID(userID, params) {
 
     return omitHash(user.get());
 }
+
 //..update user profile
-
-
 async function userprofileUpdate(userID, params) {
     const user = await getUserID(userID);
     const file = fs.readFileSync(params.profileImg);
@@ -209,8 +212,7 @@ async function userprofileUpdate(userID, params) {
 
     return omitHash(user.get());
 }
-
-
+//....update Bacnk details 
 async function updateuserBank(userID, params) {
    
     let objc = {};
@@ -227,8 +229,6 @@ async function updateuserBank(userID, params) {
 
     return omitHash(user.get());
 }
-
-
 
 //...reset Password userInfo
 async function resetPassword(userID, params) {
@@ -275,12 +275,12 @@ function omitHash(user) {
 
 //update Otp 
 
-async function forgotpassword(param) {
+async function sentOtptoemail(param) {
     var objc = {}
     // const user = await db.User.findOne({ where: { email: param.email } })
-    if (await db.User.findOne({ where: { email: param.email } })) {
-        throw 'email "' + param.email + '" is already taken';
-    }
+    // if (await db.User.findOne({ where: { email: param.email } })) {
+        
+    
     objc.email = param.email
     // await forgotpasswordtoEmail(objc)
 
@@ -321,15 +321,75 @@ async function forgotpassword(param) {
          const users = await db.Otp.findOne({ where: { email:param.email}})
          if (!users) {
             await db.Otp.create(objc);
+           
          }else {
             await users.destroy();
             await db.Otp.create(objc);
+           
          }
+        
+        // else {
+        //     throw 'email "' + param.email + '" is not in SevenchatsHR';
+        // }
    
     // // // const user = await db.User.findByPk(userID);
     // if (!user) throw 'User not found';
     // return user;
 }
+
+//...reset Password userInfo
+async function changePWDemail(param) {
+ let params = {};
+  params.password = param.password
+
+ const userotp = await db.Otp.findOne({ where: { email:param.email}})
+    if (param.otp != userotp.otp) throw 'Otp Does not Match';
+
+    const user = await db.User.findOne({ where: { email: param.email } })
+    console.log('-------userdetails',param.email)
+    // hash password if it was entered
+    if (params.password) {
+        params.hash = await bcrypt.hash(params.password, 10);
+    }
+
+   user.update({
+        params: params.hash 
+    },{ where: { email: param.email}});
+
+    // copy params to user and save
+    Object.assign(user, params);
+    await user.save();
+
+    return omitHash(user.get());
+
+}
+
+
+async function changePWDmobile(param) {
+    let params = {};
+     params.password = param.password
+   
+    const userotp = await db.Otp.findOne({ where: { mobileNo:param.mobileNo}})
+       if (param.otp != userotp.otp) throw 'Otp Does not Match';
+   
+       const user = await db.User.findOne({ where: { mobileNo: param.mobileNo } })
+       console.log('-------userdetails',param.email)
+       // hash password if it was entered
+       if (params.password) {
+           params.hash = await bcrypt.hash(params.password, 10);
+       }
+   
+      user.update({
+           params: params.hash 
+       },{ where: { mobileNo: param.mobileNo}});
+   
+       // copy params to user and save
+       Object.assign(user, params);
+       await user.save();
+   
+       return omitHash(user.get());
+   
+   }
 
 //sentotp forGotPWD
 async function sendOTPforgot(param) {
@@ -393,6 +453,7 @@ async function sendOTPforgot(param) {
 
 
 async function sendOTPforgotMobile(param) {
+    console.log('inside user.service:453')
     var objc = {}
     // const user = await db.User.findOne({ where: { mobileNo: param.mobileNo } })
 
@@ -438,7 +499,7 @@ async function sendOTPforgotMobile(param) {
          const users = await db.Otp.findOne({ where: { mobileNo:param.to}})
          if (!users) {
             await db.Otp.create(objc);
-            sendOtpToMobile_valid(mobileNo)
+           // sendOtpToMobile_valid(mobileNo)
          }else {
             // console.log('users2')
             await users.destroy();
@@ -455,17 +516,14 @@ async function sendOTPforgotMobile(param) {
     // return users;
 }
 
-
-
-
 async function sendOtpToMobile(param) {
     var objc = {}
     // const user = await db.User.findOne({ where: { mobileNo: param.mobileNo } })
 
     console.log('param.mobileNo',param.to);
-    if (await db.User.findOne({ where: { mobileNo: param.to } })) {
-        throw 'mobileNo "' + param.mobileNo + '" is already taken';
-    }
+    // if (await db.User.findOne({ where: { mobileNo: param.to } })) {
+       
+    
     objc.mobileNo = param.to
     // await forgotpasswordtoEmail(objc)
 
@@ -504,7 +562,7 @@ async function sendOtpToMobile(param) {
          const users = await db.Otp.findOne({ where: { mobileNo:param.to}})
          if (!users) {
             await db.Otp.create(objc);
-            sendOtpToMobile_valid(mobileNo)
+            // sendOtpToMobile_valid(objc.mobileNo)
          }else {
             // console.log('users2')
             await users.destroy();
@@ -512,6 +570,10 @@ async function sendOtpToMobile(param) {
             // sendOtpToMobile_valid(mobileNo)
           
          }
+        // }
+        // else {
+        //     throw 'mobileNo "' + param.mobileNo + '" is not Availabe in SevenchatsHR';
+        // }
    
     // // // const user = await db.User.findByPk(userID);
     // if (!user) throw 'User not found';

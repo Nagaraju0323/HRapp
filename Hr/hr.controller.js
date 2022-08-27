@@ -3,11 +3,14 @@ const router = express.Router();
 const Joi = require('joi');
 const validateRequest = require('_middleware/validate-request');
 const authorize = require('_middleware/authorize')
+const {successResponse} = require('../_middleware/error-handler')
+
 const userService = require('./hr.service');
 
 // routes
-router.post('/authenticate', authenticateSchema, authenticate);
-router.post('/register', registerSchema, register);
+router.post('/hrloginemail', authenticateSchema, authenticate);
+router.post('/hrloginmobile', authenticateSchemaMobile, authenticatemobile);
+router.post('/hrregister', registerSchema, register);
 router.get('/hrdetails', authorize(), getAll);
 router.get('/current', authorize(), getCurrent);
 router.get('/:id', authorize(), getById);
@@ -26,9 +29,25 @@ function authenticateSchema(req, res, next) {
     validateRequest(req, next, schema);
 }
 
+function authenticateSchemaMobile(req, res, next) {
+    const schema = Joi.object({
+        mobileNo: Joi.string().required(),
+        password: Joi.string().required()
+    });
+    validateRequest(req, next, schema);
+}
+
 function authenticate(req, res, next) {
     userService.authenticate(req.body)
-        .then(user => res.json(user))
+        // .then(user => res.json(user))
+        .then(users => successResponse(res,users,0,'success'))
+        .catch(next);
+}
+
+function authenticatemobile(req, res, next) {
+    userService.authenticateMobile(req.body)
+        // .then(user => res.json(user))
+        .then(users => successResponse(res,users,0,'success'))
         .catch(next);
 }
 
@@ -37,6 +56,8 @@ function registerSchema(req, res, next) {
         firstName: Joi.string().required(),
         lastName: Joi.string().required(),
         email: Joi.string().required(),
+        mobileNo: Joi.string().required(),
+        profileImg: Joi.string().required(),
         password: Joi.string().min(6).required()
     });
     validateRequest(req, next, schema);
@@ -44,13 +65,15 @@ function registerSchema(req, res, next) {
 
 function register(req, res, next) {
     userService.create(req.body)
-        .then(() => res.json({ message: 'HR Registration successful' }))
+        // .then(() => res.json({ message: 'HR Registration successful' }))
+        .then(users => successResponse(res,users,0,'success'))
         .catch(next);
 }
 
 function getAll(req, res, next) {
     userService.getAll()
-        .then(users => res.json(users))
+        // .then(users => res.json(users))
+        .then(users => successResponse(res,users,0,'success'))
         .catch(next);
 }
 
@@ -60,7 +83,8 @@ function getCurrent(req, res, next) {
 
 function getById(req, res, next) {
     userService.getById(req.params.id)
-        .then(user => res.json(user))
+        // .then(user => res.json(user))
+        .then(users => successResponse(res,users,0,'success'))
         .catch(next);
 }
 
@@ -69,6 +93,8 @@ function updateSchema(req, res, next) {
         firstName: Joi.string().empty(''),
         lastName: Joi.string().empty(''),
         email: Joi.string().empty(''),
+        mobileNo: Joi.string().empty(''),
+        profileImg: Joi.string().required(),
         password: Joi.string().min(6).empty('')
     });
     validateRequest(req, next, schema);

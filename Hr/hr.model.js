@@ -9,6 +9,9 @@ function model(sequelize) {
         // username: { type: DataTypes.STRING, allowNull: false },
         activeStatus: { type: DataTypes.STRING, allowNull: false },
         email: { type: DataTypes.STRING, allowNull: false },
+        mobileNo: { type: DataTypes.STRING, allowNull: false },
+        profileImg: { type: DataTypes.STRING, allowNull: false },
+        userID: { type: DataTypes.INTEGER, allowNull:false},
         hash: { type: DataTypes.STRING, allowNull: false }
     };
 
