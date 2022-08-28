@@ -15,9 +15,12 @@ router.get('/hrdetails', authorize(), getAll);
 router.get('/current', authorize(), getCurrent);
 router.get('/:id', authorize(), getById);
 router.put('/activateHr', authorize(), updateSchemaHr, updateHr);
-
 router.put('/:id', authorize(), updateSchema, update);
 router.delete('/:id', authorize(), _delete);
+router.post('/hrsentOtpemailPWD', sentOtptemailPWD);
+router.post('/hrsentOtpmobilePWD', sentOtpmobilePWD);
+router.post('/hrchangePWDemail', changePWDemail);
+router.post('/hrchangePWDmobile', changePWDmobile);
 
 module.exports = router;
 
@@ -123,5 +126,39 @@ function updateHr(req, res, next) {
 function _delete(req, res, next) {
     userService.delete(req.params.id)
         .then(() => res.json({ message: 'HR deleted successfully' }))
+        .catch(next);
+}
+
+function sentOtptemailPWD(req, res, next) {
+
+    userService.sendOTPforgot(req.body)
+        // .then(() => res.json({ message: 'send link email successfully' }))
+        .then(users => successResponse(res,users,0,'success'))
+        .catch(next);
+}
+
+
+function sentOtpmobilePWD(req, res, next) {
+console.log(req.body)
+    userService.sendOTPforgotMobile(req.body)
+        // .then(() => res.json({ message: 'send link mobile successfully' }))
+        .then(users => successResponse(res,users,0,'success'))
+        .catch(next);
+}
+
+function changePWDemail(req, res, next) {
+    console.log('this is claling')
+    const id = req.params.userID;
+    userService.changePWDemail(req.body)
+    .then(users => successResponse(res,users,0,'success'))
+        .catch(next);
+}
+
+//change PWD mobile 
+function changePWDmobile(req, res, next) {
+    console.log('this is claling')
+    const id = req.params.userID;
+    userService.changePWDmobile(req.body)
+    .then(users => successResponse(res,users,0,'success'))
         .catch(next);
 }

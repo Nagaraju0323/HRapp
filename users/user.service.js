@@ -360,7 +360,7 @@ async function changePWDemail(param) {
     Object.assign(user, params);
     await user.save();
 
-    return omitHash(user.get());
+    // return omitHash(user.get());
 
 }
 
@@ -387,7 +387,7 @@ async function changePWDmobile(param) {
        Object.assign(user, params);
        await user.save();
    
-       return omitHash(user.get());
+    //    return omitHash(user.get());
    
    }
 
