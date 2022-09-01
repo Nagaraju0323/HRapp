@@ -19,6 +19,7 @@ function model(sequelize) {
         Doj: { type: DataTypes.STRING, allowNull:true},
         bankName: { type: DataTypes.STRING, allowNull:true},
         PAN: { type: DataTypes.STRING, allowNull:true},
+        bloodgroup: { type: DataTypes.STRING, allowNull:true},
         hash: { type: DataTypes.STRING, allowNull: false }
     };
 

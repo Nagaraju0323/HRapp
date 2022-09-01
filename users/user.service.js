@@ -78,11 +78,11 @@ async function authenticatetoMobile({ mobileNo, password }) {
 async function getAll() {
     let data = [];
     let users = await db.User.findAll()
-    data = {
-        "data": users,
-        status : 200
-     }
-    return data;
+    // data = {
+    //     "data": users,
+    //     status : 200
+    //  }
+    return users;
 }
 //...search with UserInformation
 async function getAlls(search) {
@@ -93,18 +93,18 @@ async function getAlls(search) {
 
             })
           });
-   if (user.length === 0){
-    data = {
-        "error":'Search Items Notfound',
-        status : 0
-     }
-   }else {
-    data = {
-        "data":user,
-        status : 0
-     }
-   }
-    return await data
+//    if (user.length === 0){
+//     data = {
+//         "error":'Search Items Notfound',
+//         status : 0
+//      }
+//    }else {
+//     data = {
+//         "data":user,
+//         status : 0
+//      }
+//    }
+    return await user
 }
 //...userInfo by UserID
 async function getById(id) {
@@ -140,6 +140,7 @@ async function create(params) {
     params.Doj = "0"
     params.bankName = "0"
     params.PAN = "0"
+    params.bloodgroup = ""
     
 
     // save user
@@ -185,7 +186,7 @@ async function userupdateID(userID, params) {
     if (mobileNoChanged && await db.User.findOne({ where: { mobileNo: params.mobileNo } })) {
         throw 'mobileNo "' + params.mobileNo + '" is already taken';
     }
-
+   
     // hash password if it was entered
     if (params.password) {
         params.hash = await bcrypt.hash(params.password, 10);
@@ -222,6 +223,7 @@ async function updateuserBank(userID, params) {
     objc.Doj = params.Doj
     objc.bankName = params.bankName;
     objc.PAN = params.PAN
+    
    
     // copy params to user and save
     Object.assign(user, objc);
@@ -246,7 +248,7 @@ async function resetPassword(userID, params) {
     Object.assign(user, params);
     await user.save();
 
-    return omitHash(user.get());
+    // return omitHash(user.get());
 }
 
 async function user_delete(userID) {
@@ -583,6 +585,7 @@ async function sendOtpToMobile(param) {
 async function validOtp(param) {
     const user = await db.Otp.findOne({ where: { email:param.email}})
     if (param.otp != user.otp) throw 'Otp Does not Match';
+    
     // return user;
 }
 

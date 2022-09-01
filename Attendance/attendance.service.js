@@ -72,21 +72,7 @@ async function getbyDate(userID,params) {
     let currentdate = params.date 
     console.log('dateformat',currentdate)
     const user = await db.Attendace.findAndCountAll({ where: { userID:userID,startDate:currentdate } });
-    if (user.count == 0){
-        data = {
-            "error":'Search Items Notfound',
-            status : 400
-         }
-    }
-    if (user.count != 0){
-         data = {
-            count: user.count,
-            data: user.rows,
-            status : 200
-         }
-    }
-    
-    return await data
+    return await user.rows[0]
     
 }
 
@@ -129,7 +115,8 @@ async function getById(id) {
     return await getUser(id);
 }
 
-async function inTime(params) {
+async function 
+inTime(params) {
     
     let userID = params.userID
 
@@ -171,6 +158,15 @@ async function inTime(params) {
     params.inStatus = "1"
     params.holidayStatus  = 5
     params.present = 1
+    //add empty values 
+
+    params.outStatus = "0"
+    params.absentDay = "0"
+    params.outTime = "0"
+    params.leaveType = "0"
+    params.endDate = "0"
+    params.leaveStatus = "0"
+    params.leaveCount = 0
     await db.Attendace.create(params);
 
 }

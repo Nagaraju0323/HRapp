@@ -19,7 +19,7 @@ router.get('/current', authorize(), getCurrent);
 router.get('/userDeatils', authorize(), getByUser);
 router.get('/:id', authorize(), getById);
 router.put('/resetPassword', authorize(),resetPassword);
-router.put('/userupdate', authorize(), updateSchema, userupdate);
+router.put('/userProfileupdate', authorize(), updateSchema, userupdate);
 router.put('/profilePicupdate', authorize(), userprofileupdate);
 router.delete('/deleteuser', authorize(), user_delete);
 router.post('/sentOtptoemail', sentOtptoemail);
@@ -147,6 +147,7 @@ function updateSchema(req, res, next) {
         Address: Joi.string().empty(''),
         profileImg: Joi.string().empty(''),
         userID: Joi.string().empty(''),
+        bloodgroup:Joi.string().empty(''),
        
     });
     validateRequest(req, next, schema);
@@ -154,20 +155,20 @@ function updateSchema(req, res, next) {
 //..userUpdate
 function userupdate(req, res, next) {
     userService.userupdateID(req.body.userID, req.body)
-        .then(user => res.json(user))
+    .then(users => successResponse(res,users,0,'success'))
         .catch(next);
 }
 
 function userprofileupdate(req, res, next) {
     userService.userupdateID(req.body.userID,req.body)
-        .then(user => res.json(user))
+    .then(users => successResponse(res,users,0,'success'))
         .catch(next);
 }
 //..update BankDetails 
 
 function updateUserDetails(req, res, next) {
     userService.userprofileUpdate(req.body.userID,req.body)
-        .then(user => res.json(user))
+    .then(users => successResponse(res,users,0,'success'))
         .catch(next);
 }
 
@@ -177,7 +178,7 @@ function resetPassword(req, res, next) {
     console.log('this is claling')
     const id = req.params.userID;
     userService.resetPassword(req.body.userID, req.body)
-        .then(user => res.json(user))
+    .then(users => successResponse(res,users,0,'success'))
         .catch(next);
 }
 //change PWD

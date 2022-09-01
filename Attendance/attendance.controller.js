@@ -4,6 +4,7 @@ const Joi = require('joi');
 const validateRequest = require('_middleware/validate-request');
 const authorize = require('_middleware/authorize')
 const userService = require('./attendance.service');
+const {successResponse} = require('../_middleware/error-handler')
 
 // routes
 
@@ -50,23 +51,26 @@ function registerSchemaOut(req, res, next) {
 //..employee Intime 
 function employeeInTime(req, res, next) {
     userService.inTime(req.body)
-        .then(() => res.json({ 
-             message: 'successful In',
-             status:200
-            }
-            ))
+        // .then(() => res.json({ 
+        //      message: 'successful In',
+        //      status:200
+        //     }
+        //     ))
+        .then(users => successResponse(res,users,0,'success'))
         .catch(next);
 }
 //..employee Intime 
 function employeeOutTime(req, res, next) {
     userService.OutTime(req.body)
-        .then(() => res.json({ message: 'successfully out',status:0}))
+        // .then(() => res.json({ message: 'successfully out',status:0}))
+        .then(users => successResponse(res,users,0,'success'))
         .catch(next);
 }
 
 function employeeabsent(req, res, next) {
     userService.empabsent(req.body)
-        .then(() => res.json({ message: 'Employee Is absent',status:0}))
+        // .then(() => res.json({ message: 'Employee Is absent',status:0}))
+        .then(users => successResponse(res,users,0,'success'))
         .catch(next);
 }
 
@@ -74,21 +78,24 @@ function employeeabsent(req, res, next) {
 
 function getAll(req, res, next) {
     userService.getAll()
-        .then(users => res.json({ "data": users,status:0}))
+        // .then(users => res.json({ "data": users,status:0}))
+        .then(users => successResponse(res,users,0,'success'))
         .catch(next);
 }
 
 function getAllAtd(req, res, next) {
     const id = req.params.userID;
     userService.getAllbyId(req.body.userID)
-        .then(user => res.json(user))
+        // .then(user => res.json(user))
+        .then(users => successResponse(res,users,0,'success'))
         .catch(next);
 }
 
 function getbyCurrentDate(req, res, next) {
     const id = req.params.userID;
     userService.getbyDate(req.body.userID,req.body)
-        .then(user => res.json(user))
+        // .then(user => res.json(user))
+        .then(users => successResponse(res,users,0,'success'))
         .catch(next);
 }
 
@@ -103,7 +110,8 @@ function getbyDifftDate(req, res, next) {
 function getById(req, res, next) {
     const id = req.params.userID;
     userService.getById(req.params.userID)
-        .then(user => res.json(user))
+        // .then(user => res.json(user))
+        .then(users => successResponse(res,users,0,'success'))
         .catch(next);
 }
 
@@ -120,7 +128,8 @@ function updateSchema(req, res, next) {
 
 function attendanceupdate(req, res, next) {
     userService.update(req.params.id, req.body)
-        .then(user => res.json(user))
+        // .then(user => res.json(user))
+        .then(users => successResponse(res,users,0,'success'))
         .catch(next);
 }
 
