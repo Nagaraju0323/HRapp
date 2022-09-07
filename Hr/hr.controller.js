@@ -1,26 +1,29 @@
 const express = require('express');
+const { required } = require('joi');
 const router = express.Router();
 const Joi = require('joi');
 const validateRequest = require('_middleware/validate-request');
-const authorize = require('_middleware/authorize')
+const authorizehr = require('_middleware/authorize')
 const {successResponse} = require('../_middleware/error-handler')
-
 const userService = require('./hr.service');
 
 // routes
+router.post('/hrDetailsExisted', authenticateuserDeatils, userDetailsExisted);
 router.post('/hrloginemail', authenticateSchema, authenticate);
 router.post('/hrloginmobile', authenticateSchemaMobile, authenticatemobile);
 router.post('/hrregister', registerSchema, register);
-router.get('/hrdetails', authorize(), getAll);
-router.get('/current', authorize(), getCurrent);
-router.get('/:id', authorize(), getById);
-router.put('/activateHr', authorize(), updateSchemaHr, updateHr);
-router.put('/:id', authorize(), updateSchema, update);
-router.delete('/:id', authorize(), _delete);
+router.get('/hrdetails', authorizehr(), getAll);
+router.get('/current', authorizehr(), getCurrent);
+router.get('/:id', authorizehr(), getById);
+router.put('/activateHr', authorizehr(), updateSchemaHr, updateHr);
+router.put('/:id', authorizehr(), updateSchema, update);
+router.put('/hrresetPassword', authorizehr(),hrresetPassword);
+router.delete('/:id', authorizehr(), _delete);
 router.post('/hrsentOtpemailPWD', sentOtptemailPWD);
 router.post('/hrsentOtpmobilePWD', sentOtpmobilePWD);
 router.post('/hrchangePWDemail', changePWDemail);
 router.post('/hrchangePWDmobile', changePWDmobile);
+
 
 module.exports = router;
 
@@ -38,6 +41,29 @@ function authenticateSchemaMobile(req, res, next) {
         password: Joi.string().required()
     });
     validateRequest(req, next, schema);
+}
+
+function authenticateuserDeatils(req, res, next) {
+    const schema = Joi.object({
+        mobileNo: Joi.string().required(),
+        password: Joi.string().required()
+    });
+    validateRequest(req, next, schema);
+}
+
+function userDetailsExisted(req,res,next){
+        userService.userDeatilsExisted(req.body)
+            .then(users => successResponse(res,users,0,'success'))
+            .catch(next);
+    
+
+}
+
+function hrresetPassword(req, res, next) {
+    const id = req.params.userID;
+    userService.resetPassword(req.body)
+    .then(users => successResponse(res,users,0,'success'))
+        .catch(next);
 }
 
 function authenticate(req, res, next) {

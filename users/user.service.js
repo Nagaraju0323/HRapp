@@ -93,17 +93,6 @@ async function getAlls(search) {
 
             })
           });
-//    if (user.length === 0){
-//     data = {
-//         "error":'Search Items Notfound',
-//         status : 0
-//      }
-//    }else {
-//     data = {
-//         "data":user,
-//         status : 0
-//      }
-//    }
     return await user
 }
 //...userInfo by UserID
@@ -113,7 +102,7 @@ async function getById(id) {
 
 
 async function getByUserID(userID) {
-    console.log('this')
+    
     return await getUserID(userID);
 }
 
@@ -140,7 +129,7 @@ async function create(params) {
     params.Doj = "0"
     params.bankName = "0"
     params.PAN = "0"
-    params.bloodgroup = ""
+    params.bloodgroup = "0"
     
 
     // save user
@@ -265,7 +254,6 @@ async function getUser(id) {
 
 async function getUserID(userID) {
     const user = await db.User.findOne({ where: { userID: userID } })
-    // const user = await db.User.findByPk(userID);
     if (!user) throw 'User not found';
     return user;
 }

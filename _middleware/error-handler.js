@@ -50,17 +50,6 @@ function successResponse(res,data,status,message){
 
         
     }
-    
-//     let jsonData = {
-//         data:data,
-//         meta:{
-//             statusCode:status,
-//             message:message
-//         }
-//     }
-
-//    return res.status(200).json(jsonData)
-
 }
 
 module.exports.errorHandler = errorHandler

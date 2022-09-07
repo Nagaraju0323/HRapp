@@ -29,6 +29,7 @@ module.exports = {
     getAll,
     getAllbyId,
     getById,
+    getAllDate,
     inTime,
     leaveAttendance,
     OutTime,
@@ -40,7 +41,8 @@ module.exports = {
     getreminderById,
     delete: _delete,
     caluclateAtd,
-    caluclateLeaveMng
+    caluclateLeaveMng,
+    Instatus
 };
 
 async function authenticate({ email, password }) {
@@ -59,22 +61,46 @@ async function getAll() {
 }
 
 async function getAllbyId(userID) {
-    const user = await db.Attendace.findAndCountAll({ where: { userID } });
-    let data = {
-        count: user.count,
-        data: user.rows,
-        status : 0
-     }
-    return await data
+    console.log('userid',userID)
+    const user = await db.Attendace.findAndCountAll({ where: { userID:userID} });
+    return await user.rows
 }
 
-async function getbyDate(userID,params) {
+// async function getbyDate(userID,params) {
+//     let currentdate = params.date 
+//     console.log('dateformat',currentdate)
+//     const user = await db.Attendace.findAndCountAll({ where: { userID:userID,startDate:currentdate } });
+//     return await user.rows[0]
+// }
+//get by All Attenadce Date 
+
+async function getAllDate(params) {
+    // console.log('dateformat',currentdate)
+    let currentdate = params.date 
+    console.log('currentdate',currentdate)
+    const user = await db.Attendace.findAndCountAll({ where: { startDate:currentdate } });
+    return await user.rows
+    
+}
+
+async function getbyDate(params) {
     let currentdate = params.date 
     console.log('dateformat',currentdate)
-    const user = await db.Attendace.findAndCountAll({ where: { userID:userID,startDate:currentdate } });
+    const user = await db.Attendace.findAndCountAll({ where: { userID:params.userID,startDate:currentdate } });
     return await user.rows[0]
     
 }
+
+async function Instatus(params) {
+    let currentdate = params.date 
+    console.log('dateformat',currentdate)
+    const user = await db.Attendace.findAndCountAll({ where: { userID:params.userID,startDate:params.date} });
+
+    // user.rows[0].Instatus
+    return await user.rows[0].Instatus
+    
+}
+
 
 async function getbyDiffDate(userID,params) {
     let startdate = params.startDate 
@@ -142,10 +168,12 @@ inTime(params) {
     let currentDate = year + "-" + month + "-" + date + " " + hours + ":" + minutes + ":" + seconds + " " + ampm;
     let currentdate =  year + "-" + month + "-" + date ;
 
+    console.log(currentDate)
     const user = await db.Attendace.findAndCountAll({ where: { userID } });
     for (let i = 0; i < user.count; i++) { 
         if (user.rows[i].startDate == currentdate){
         var timesplit = user.rows[i].inTime.split(' ')[0];
+        console.log(timesplit)
         if (currentdate === timesplit){
             if (user) throw 'already login';
            return user;
@@ -240,8 +268,8 @@ async function OutTime(params) {
     if (matthdif <= 480){
        const userinfo = await db.User.findOne({ where: { userID:userID}});
        objc.sendTo = userinfo.email
-       objc.titleType = 'REMINDER OF TIME LINE'
-       objc.descriptionType = 'YOUR NOT COMPLETED THE 8 HOUTS SO GENTLE REMINDER TO FINISH NEXT TIME',
+       objc.titleType = 'REMINDER'
+       objc.descriptionType = 'Not Complete 8hrs Riminder to complete it next days',
         getreminderById(objc)
 
     }
@@ -441,9 +469,9 @@ async function getreminderById(params) {
     var msg = {
           to: toMail,
           from: 'Sevenchats.blr@gmail.com',
-          subject: 'REMINDER OF TIME LINE',
+          subject: 'REMINDER',
           text: 'conformation Code',
-          html: 'YOUR NOT COMPLETED THE 8 HOUTS SO GENTLE REMINDER TO FINISH NEXT TIME',
+          html: 'Not Complete 8hrs Riminder to complete it next days',
         };
   
         sgMail

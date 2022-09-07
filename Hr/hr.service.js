@@ -13,6 +13,7 @@ const apikeySms = "https://http-api.d7networks.com/send"
 sgMail.setApiKey(apiKey);
 
 module.exports = {
+    userDeatilsExisted,
     authenticate,
     authenticateMobile,
     getAll,
@@ -24,8 +25,23 @@ module.exports = {
     sendOTPforgot,
     sendOTPforgotMobile,
     changePWDemail,
-    changePWDmobile
+    changePWDmobile,
+    resetPassword
 };
+
+
+async function userDeatilsExisted({ params }) {
+  
+    if (await db.Hr.findOne({ where: { email: params.email } })) {
+        throw 'email "' + params.email + '" is already taken';
+    }
+    
+    if (await db.Hr.findOne({ where: { mobileNo: params.mobileNo } })) {
+        throw 'mobileNo "' + params.mobileNo + '" is already taken';
+    }
+    // authentication successful
+  
+}
 
 async function authenticate({ email, password }) {
     const user = await db.Hr.scope('withHash').findOne({ where: { email } });
@@ -52,14 +68,7 @@ async function authenticateMobile({ mobileNo, password }) {
 
 async function getAll() {
   let userdata = await db.Hr.findAll();
-    let sqlResults = [
-        {
-            "data":userdata,
-            "status": 200,
-        }
-    ];
-   // var ress = JSON.stringify(sqlResults)
-    return await sqlResults;
+    return await userdata;
 }
 
 async function getById(id) {
@@ -71,6 +80,12 @@ async function create(params) {
     if (await db.Hr.findOne({ where: { email: params.email } })) {
         throw 'email "' + params.email + '" is already taken';
     }
+    
+    if (await db.Hr.findOne({ where: { mobileNo: params.mobileNo } })) {
+        throw 'mobileNo "' + params.mobileNo + '" is already taken';
+    }
+    console.log('message')
+
   // hash password
     if (params.password) {
         params.hash = await bcrypt.hash(params.password, 10);
@@ -320,5 +335,30 @@ async function changePWDemail(param) {
       
       }
 
+//...reset Password userInfo
+async function resetPassword(params) {
+    console.log('message')
+    const user = await getUserID(params.userID);
+    // hash password if it was entered
+    if (params.password) {
+        params.hash = await bcrypt.hash(params.password, 10);
+    }
 
+   user.update({
+        params: params.hash 
+    },{ where: { userID: params.userID }});
 
+    // copy params to user and save
+    Object.assign(user, params);
+    await user.save();
+
+    // return omitHash(user.get());
+}
+
+async function getUserID(userID) {
+    console.log('resuserIDet',userID)
+    const user = await db.Hr.findOne({ where: { userID: userID } })
+    // const user = await db.User.findByPk(userID);
+    if (!user) throw 'User not found';
+    return user;
+}

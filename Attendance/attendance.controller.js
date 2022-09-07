@@ -3,18 +3,27 @@ const router = express.Router();
 const Joi = require('joi');
 const validateRequest = require('_middleware/validate-request');
 const authorize = require('_middleware/authorize')
+
 const userService = require('./attendance.service');
 const {successResponse} = require('../_middleware/error-handler')
 
 // routes
 
-router.post('/empAttendanceIn',  authorize(),registerSchemaIn, employeeInTime);
+router.post('/empAttendanceIn', authorize(),registerSchemaIn, employeeInTime);
 router.post('/empAttendanceOut',  authorize(),registerSchemaOut, employeeOutTime);
 router.post('/absent',authorize(), employeeabsent);
 //..leaveapply 
 router.get('/getAllAttendance', authorize(), getAll);
 router.get('/getAllbyId', authorize(), getAllAtd);
 router.get('/getCurrentDate', authorize(), getbyCurrentDate);
+
+//get byt attandnace by Date 
+
+router.get('/getAll',authorize(), getAllDate);
+
+
+
+router.get('/getInStatus', authorize(), getInStatus);
 router.get('/getDiffDate', authorize(), getbyDifftDate);
 router.get('/:userid', authorize(), getById);
 router.put('/updateAttendance', authorize(), updateSchema, update);
@@ -51,11 +60,6 @@ function registerSchemaOut(req, res, next) {
 //..employee Intime 
 function employeeInTime(req, res, next) {
     userService.inTime(req.body)
-        // .then(() => res.json({ 
-        //      message: 'successful In',
-        //      status:200
-        //     }
-        //     ))
         .then(users => successResponse(res,users,0,'success'))
         .catch(next);
 }
@@ -84,16 +88,35 @@ function getAll(req, res, next) {
 }
 
 function getAllAtd(req, res, next) {
-    const id = req.params.userID;
-    userService.getAllbyId(req.body.userID)
+    userService.getAllbyId(req.query.userID)
         // .then(user => res.json(user))
         .then(users => successResponse(res,users,0,'success'))
         .catch(next);
 }
 
 function getbyCurrentDate(req, res, next) {
-    const id = req.params.userID;
-    userService.getbyDate(req.body.userID,req.body)
+    console.log("---------",req.query.date)
+  // userService.getbyDate(req.body.userID,req.body)
+    userService.getbyDate(req.query)
+        // .then(user => res.json(user))
+        .then(users => successResponse(res,users,0,'success'))
+        .catch(next);
+}
+
+//get All Attenance By DAte 
+
+function getAllDate(req, res, next) {
+    console.log("---------",req.query.date)
+ 
+    userService.getAllDate(req.query)
+        // .then(user => res.json(user))
+        .then(users => successResponse(res,users,0,'success'))
+        .catch(next);
+}
+
+
+function getInStatus(req, res, next) {
+    userService.getbyDate(req.query)
         // .then(user => res.json(user))
         .then(users => successResponse(res,users,0,'success'))
         .catch(next);
