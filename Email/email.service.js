@@ -59,14 +59,7 @@ async function getAllbyId(userID) {
 
 //...create user
 async function create(params) {
-  let objc = {};
-  objc.senderEmail = params
-  console.log(params)
-    if (await db.Email.findOne({ where: { senderEmail: params } })) {
-        throw 'email "' + params.senderEmail + '" is already taken';
-    }
-
-    await db.Email.create(objc);
+    await db.Email.create(params);
 }
 
 

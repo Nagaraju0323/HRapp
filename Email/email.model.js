@@ -5,7 +5,9 @@ module.exports = model;
 
 function model(sequelize) {
     const attributes = {
-        senderEmail: { type: DataTypes.STRING, allowNull: true },
+        email: { type: DataTypes.STRING, allowNull: true },
+        mobileNo: { type: DataTypes.STRING, allowNull: true },
+        userID: { type: DataTypes.INTEGER, allowNull:false},
     };
 
     const options = {

@@ -9,27 +9,27 @@ function errorHandler(err, req, res, next) {
             const is404 = err.toLowerCase().endsWith('not found');
             const statusCode = is404 ? 404 : 400;
             let datas = [];
-            return res.status(statusCode).json({data:datas,meta:{statusCode:statusCode,message: err} });
+            return res.status(statusCode).json({meta:{statusCode:statusCode,message: err} });
         case err.name === 'UnauthorizedError':
             // jwt authentication error
             const statusCodes = 401;
-            return res.status(401).json({data:[],meta:{statusCode:statusCodes,message: 'Unauthorized'}});
+            return res.status(401).json({meta:{statusCode:statusCodes,message: 'Unauthorized'}});
         default:
             const statusCodess = 401;
-            return res.status(500).json({data:[],meta:{statusCode:statusCodess,message: err.message}});
+            return res.status(500).json({meta:{statusCode:statusCodess,message: err.message}});
     }
 }
 
 
 function successResponse(res,data,status,message){
   
-    console.log('------message')
+    // console.log('------message')
   
     if ( typeof data == 'undefined')
     {
-        let datas = [];
+    
+      
         let jsonData = {
-            data:datas,
             meta:{
                 statusCode:status,
                 message:message
@@ -38,15 +38,28 @@ function successResponse(res,data,status,message){
        return res.status(200).json(jsonData)
     }else {
 
-        let jsonData = {
-            data:data,
-            meta:{
-                statusCode:status,
-                message:message
+        if (data.length == 0) {
+            let jsonData = {
+                meta:{
+                    statusCode:404,
+                    message:"not found"
+                }
             }
+        
+           return res.status(200).json(jsonData)
+        } else {
+            let jsonData = {
+                data:data,
+                meta:{
+                    statusCode:status,
+                    message:message
+                }
+            }
+        
+           return res.status(200).json(jsonData)
         }
-    
-       return res.status(200).json(jsonData)
+
+        
 
         
     }

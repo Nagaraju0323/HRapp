@@ -10,7 +10,7 @@ function model(sequelize) {
         leaveType: { type: DataTypes.INTEGER , allowNull: true },
         titleType: { type: DataTypes.STRING, allowNull: true },
         descriptionType: { type: DataTypes.STRING, allowNull: true },
-        duationDates: { type: DataTypes.JSON, allowNull: true },
+        // duationDates: { type: DataTypes.JSON, allowNull: true },
         startDate: { type: DataTypes.STRING, allowNull: true },
         endDate: { type: DataTypes.STRING, allowNull: true },
         userID: { type: DataTypes.STRING, allowNull:true},

@@ -7,6 +7,7 @@ const userService = require('./leave.service');
 const usershortid  = require("shortid");
 
 const {successResponse} = require('../_middleware/error-handler')
+// const {successResponse} = require('../_middleware/error-handler')
 // routes
 // router.post('/login', authenticateSchema, authenticate);
 
@@ -21,10 +22,6 @@ router.put('/approveLeave', authorize(), approveLeave);
 router.delete('/deleteLeave', authorize(), _delete);
 router.delete('/deleteAll', authorize(), deleteAll);
 
-
-
-
-
 module.exports = router;
 //...loginwith email id 
 
@@ -36,7 +33,6 @@ function applyLeaveModel(req, res, next) {
         leaveType: Joi.number().required(),
         titleType: Joi.string().min(5).required(),
         descriptionType: Joi.string().min(5).required(),
-        duationDates: Joi.object().required(),
         startDate: Joi.string().required(),
         endDate: Joi.string().required(),
         userID: Joi.string().required(),
@@ -47,29 +43,34 @@ function applyLeaveModel(req, res, next) {
 function applyLeaves(req, res, next) {
 
     userService.create(req.body)
-        .then(() => res.json({ message: 'successful Leave Applied',status:200 }))
+        .then(users => successResponse(res,users,0,'success'))
         .catch(next);
 }
 
 //...Getall Users
 function getLeaves(req, res, next) {
     userService.getAll()
-        .then(users => res.json(users))
+        // .then(users => res.json(users))
+        .then(users => successResponse(res,users,0,'success'))
         .catch(next);
 }
 
 function getLeavesbyDate(req, res, next) {
-    console.log('this is');
-    userService.getbyDate(req.body.userID,req.body)
-        .then(user => res.json(user))
+    // console.log('this is');
+   
+    // console.log('messageinfo',req.query.startDate)
+    userService.getbyDate(req.query.startDate)
+    // userService.getbyDate(req.body.userID,req.body)
+    
+    .then(users => successResponse(res,users,0,'success'))
         .catch(next);
 }
 
 function getLeavesDiffDate(req, res, next) {
     const id = req.params.userID;
     userService.getbyDiffDate(req.body.userID,req.body)
-        .then(user => res.json(user))
-        .catch(next);
+        .then(users => successResponse(res,users,0,'success'))
+        .catch(next => filure);
 }
 
 
@@ -97,7 +98,6 @@ function updateSchema(req, res, next) {
         leaveType: Joi.number().required(),
         titleType: Joi.string().min(5).required(),
         descriptionType: Joi.string().min(5).required(),
-        duationDates: Joi.object().required(),
         startDate: Joi.string().required(),
         endDate: Joi.string().required(),
         userID: Joi.string().required(),

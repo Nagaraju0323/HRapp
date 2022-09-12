@@ -54,20 +54,20 @@ async function getAll() {
 
 async function getAllbyId(userID) {
     const user = await db.Leave.findAndCountAll({ where: { userID } });
-    if (user.count ==0){
-        data = {
-            "error":'Search Items Notfound',
-            status : 400
-         }
-    }
-    if (user.count !=0){
-        data = {
-            count: user.count,
-            data: user.rows,
-            status : 0
-         }
-    }
-    return await data
+    // if (user.count ==0){
+    //     data = {
+    //         "error":'Search Items Notfound',
+    //         status : 400
+    //      }
+    // }
+    // if (user.count !=0){
+    //     data = {
+    //         count: user.count,
+    //         data: user.rows,
+    //         status : 0
+    //      }
+    // }
+    return await user.rows
 }
 
 
@@ -267,7 +267,7 @@ async function create(params) {
     }
   }
 
-    // params.leaveStatus = 3
+    params.leaveStatus = 3
     params.holidayStatus = 1
     await db.Leave.create(params);
     //..send email to users  
@@ -288,25 +288,29 @@ async function create(params) {
     }
 }
 
-async function getbyDate(userID,params) {
-    let currentdate = params.startDate 
-    console.log('dateformat',currentdate)
-    const user = await db.Leave.findAndCountAll({ where: { userID:userID,startDate:currentdate } });
-    if (user.count == 0){
-        data = {
-            "error":'Search Items Notfound',
-            status : 400
-         }
-    }
-    if (user.count != 0){
-         data = {
-            count: user.count,
-            data: user.rows,
-            status : 200
-         }
-    }
+async function getbyDate(params) {
+    // let currentdate = params.startDate 
+    console.log('messapram',params)
+    // consoel
+    // console.log('dateformat',params)
+    // const user = await db.Leave.findAndCountAll({ where: { userID:userID,startDate:currentdate } });
+    const user = await db.Leave.findAndCountAll({ where: { startDate : params} });
+
+    // if (user.count == 0){
+    //     data = {
+    //         "error":'Search Items Notfound',
+    //         status : 400
+    //      }
+    // }
+    // if (user.count != 0){
+    //      data = {
+    //         count: user.count,
+    //         data: user.rows,
+    //         status : 200
+    //      }
+    // }
     
-    return await data
+    return await user.rows
     
 }
 
@@ -387,7 +391,6 @@ async function approvedLeave(userID, params) {
          }else {
             for (let i = 0; i < listDate.length; i++) { 
                 let startDate = listDate[i]
-                 console.log('message',startDate);
                  obj.userID = params.userID
                  obj.startDate = startDate
                  obj.leaveType = params.leaveType

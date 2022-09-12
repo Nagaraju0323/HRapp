@@ -5,6 +5,7 @@ const db = require('_helpers/db');
 const { Sequelize, Op } = require("sequelize");
 const userServices  = require("shortid");
 // const userService = require('./user.service');
+const userserviceemail = require('../Email/email.service');
 const sgMail = require('@sendgrid/mail');
 const axios = require('axios').default;
 const apiKey =
@@ -40,7 +41,8 @@ module.exports = {
     sendOTPforgot,
     sendOTPforgotMobile,
     changePWDemail,
-    changePWDmobile
+    changePWDmobile,
+    updateemailID
     
 };
 
@@ -133,8 +135,23 @@ async function create(params) {
     
 
     // save user
+   
     await db.User.create(params);
+    updateemailID(params.email,params.mobileNo,randStr)
+
 }
+//update emailid
+async function updateemailID(email,mobileNo,userID) {
+    let params = {}
+    params.email = email
+    params.mobileNo = mobileNo
+    params.userID = userID
+    userserviceemail.create(params)
+    // return user;
+}
+
+
+
 //...update userInfo
 async function update(id, params) {
     const user = await getUser(id);
