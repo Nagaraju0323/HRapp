@@ -3,6 +3,8 @@ const router = express.Router();
 const Joi = require('joi');
 const validateRequest = require('_middleware/validate-request');
 const authorize = require('_middleware/authorize')
+const authorizehrs = require('_middleware/authorizeHr')
+
 const userService = require('./user.service');
 const usershortid  = require("shortid");
 const mutler = require('multer');
@@ -17,7 +19,12 @@ router.get('/getAll', authorize(), getAll);
 router.get('/search', authorize(), getAlls);
 router.get('/current', authorize(), getCurrent);
 router.get('/userDeatils', authorize(), getByUser);
+router.get('/getuserDetails', authorizehrs(), getuserDetails);
 router.get('/:id', authorize(), getById);
+
+
+
+
 router.put('/resetPassword', authorize(),resetPassword);
 router.put('/userProfileupdate', authorize(), updateSchema, userupdate);
 router.put('/profilePicupdate', authorize(), userprofileupdate);
@@ -115,12 +122,20 @@ function getById(req, res, next) {
         .catch(next);
 }
 
+function getuserDetails(req, res, next) {
+    userService.getuserDetails(req.query.userID)
+    .then(users => successResponse(res,users,0,'success'))
+        .catch(next);
+}
+
 function getByUser(req, res, next) {
     const id = req.params.userid;
     userService.getByUserID(req.body.userID)
         .then(user => res.json(user))
         .catch(next);
 }
+
+
 
 
 //..get userDeatils UserID

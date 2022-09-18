@@ -23,6 +23,7 @@ module.exports = {
     authenticatetoMobile,
     getAll,
     getAlls,
+    getuserDetails,
     getById,
     getByUserID,
     create,
@@ -101,6 +102,16 @@ async function getAlls(search) {
 async function getById(id) {
     return await getUser(id);
 }
+
+
+async function getuserDetails(userID){
+   
+    const user = await db.User.findOne({ where: { userID: userID } })
+    if (!user) throw 'User not found';
+    return user;
+    
+}
+
 
 
 async function getByUserID(userID) {
@@ -591,7 +602,7 @@ async function validOtp(param) {
     const user = await db.Otp.findOne({ where: { email:param.email}})
     if (param.otp != user.otp) throw 'Otp Does not Match';
     
-    // return user;
+    return user;
 }
 
 async function validMobileOtp(param) {

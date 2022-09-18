@@ -46,7 +46,7 @@ function successResponse(res,data,status,message){
                 }
             }
         
-           return res.status(200).json(jsonData)
+           return res.status(404).json(jsonData)
         } else {
             let jsonData = {
                 data:data,

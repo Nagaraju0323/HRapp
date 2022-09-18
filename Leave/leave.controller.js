@@ -5,6 +5,7 @@ const validateRequest = require('_middleware/validate-request');
 const authorize = require('_middleware/authorize')
 const userService = require('./leave.service');
 const usershortid  = require("shortid");
+const authorizehrs = require('_middleware/authorizeHr')
 
 const {successResponse} = require('../_middleware/error-handler')
 // const {successResponse} = require('../_middleware/error-handler')
@@ -15,10 +16,12 @@ router.post('/applyLeave',authorize(), applyLeaveModel, applyLeaves);
 router.get('/getAllLeave',authorize(), getLeaves);
 router.post('/compareLvm', authorize(), compareLeave);
 router.get('/getLeavebyID',authorize(), getLeavesbyID);
+router.get('/getLeavedate',authorize(),getleavedate);
 router.get('/getLeavebydate',authorize(), getLeavesbyDate);
+router.get('/hrgetLeavebydate',authorizehrs(), getLeavesbyDate);
 router.get('/getLeavebyDiff',authorize(), getLeavesDiffDate);
 router.put('/updateLeave', authorize(), updateSchema, update);
-router.put('/approveLeave', authorize(), approveLeave);
+router.put('/approveLeave', authorizehrs(), approveLeave);
 router.delete('/deleteLeave', authorize(), _delete);
 router.delete('/deleteAll', authorize(), deleteAll);
 
@@ -65,6 +68,15 @@ function getLeavesbyDate(req, res, next) {
     .then(users => successResponse(res,users,0,'success'))
         .catch(next);
 }
+function getleavedate(req, res, next) {
+    userService.getbyDate(req.query.startDate,req.query.userID)
+    .then(users => successResponse(res,users,0,'success'))
+        .catch(next);
+}
+
+
+
+
 
 function getLeavesDiffDate(req, res, next) {
     const id = req.params.userID;
@@ -116,7 +128,7 @@ function update(req, res, next) {
 
 function approveLeave(req, res, next) {
     userService.approvedLeave(req.body.userID, req.body)
-        .then(user => res.json(user))
+    .then(users => successResponse(res,users,0,'success'))
         .catch(next);
 }
 

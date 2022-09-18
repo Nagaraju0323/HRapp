@@ -66,14 +66,6 @@ async function getAllbyId(userID) {
     return await user.rows
 }
 
-// async function getbyDate(userID,params) {
-//     let currentdate = params.date 
-//     console.log('dateformat',currentdate)
-//     const user = await db.Attendace.findAndCountAll({ where: { userID:userID,startDate:currentdate } });
-//     return await user.rows[0]
-// }
-//get by All Attenadce Date 
-
 async function getAllDate(params) {
     // console.log('dateformat',currentdate)
     let currentdate = params.date 
@@ -350,6 +342,7 @@ async function updateLeaveAtd(params) {
    obj.leaveStatus = leaveStatus ?? {}
    
     const user = await db.Attendace.findOne({ where: { userID: userID,startDate:startDate,leaveType:leaveType}})
+    console.log('greater length equal',user.userID)
 
   //calculate the leave mangagement 
 
@@ -365,7 +358,7 @@ async function updateLeaveAtd(params) {
     if(params.leaveType == 1 || params.leaveType == 2){
             if(dateIsInWeekend==true){
             } else {
-                const users = await caluclateLeaveMng(params);
+                // const users = await caluclateLeaveMng(params);
             }
         }
     

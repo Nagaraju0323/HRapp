@@ -22,6 +22,7 @@ module.exports = {
     create,
     getAllbyId,
     getbyDate,
+    getleaveDate,
     update,
     approvedLeave,
     getUserID,
@@ -289,30 +290,17 @@ async function create(params) {
 }
 
 async function getbyDate(params) {
-    // let currentdate = params.startDate 
     console.log('messapram',params)
-    // consoel
-    // console.log('dateformat',params)
-    // const user = await db.Leave.findAndCountAll({ where: { userID:userID,startDate:currentdate } });
     const user = await db.Leave.findAndCountAll({ where: { startDate : params} });
-
-    // if (user.count == 0){
-    //     data = {
-    //         "error":'Search Items Notfound',
-    //         status : 400
-    //      }
-    // }
-    // if (user.count != 0){
-    //      data = {
-    //         count: user.count,
-    //         data: user.rows,
-    //         status : 200
-    //      }
-    // }
-    
     return await user.rows
-    
 }
+async function getleaveDate(startDate,userID) {
+    console.log('messapram',params)
+    const user = await db.Leave.findOne({ where: { startDate : startDate,userID:userID} });
+    return await user
+}
+
+
 
 
 async function getbyDiffDate(userID,params) {
@@ -363,15 +351,16 @@ async function update(userID, params) {
 
 async function approvedLeave(userID, params) {
    //approved Leave 
-   console.log('this is message');
+  
     let startDate = params.startDate
     let startDateFrm = params.startDate
     let objcCompoOff = {};
-    const user = await getUserIDDate(userID,startDate);
+    const user = await getUserIDDate(params.userID,startDate);
     Object.assign(user, params);
     await user.save();
     var listDate = [];
     var obj = {};
+   
     var endDate = params.endDate;
     var dateMove = new Date(startDate);
     var strDate = startDate;
@@ -379,13 +368,17 @@ async function approvedLeave(userID, params) {
         obj.startDate = strDate
         obj.leaveType = params.leaveType
         obj.leaveStatus = params.leaveStatus
-        obj.holidayStatus = params.holidayStatus
+        // obj.holidayStatus = params.holidayStatus
+        obj.holidayStatus = 0
+        
      while (strDate < endDate){
+         console.log('greater thatn equal')
             var strDate = dateMove.toISOString().slice(0,10);
             listDate.push(strDate);
             dateMove.setDate(dateMove.getDate()+1);
          };
          if (listDate.length == 0){
+            // console.log('greater length equal',obj)
             await attendanceService.updateLeaveAtd(obj);
             
          }else {
@@ -395,10 +388,8 @@ async function approvedLeave(userID, params) {
                  obj.startDate = startDate
                  obj.leaveType = params.leaveType
                  obj.leaveStatus = params.leaveStatus
-                 obj.holidayStatus = params.holidayStatus
+                 obj.holidayStatus = 0
                  await attendanceService.updateLeaveAtd(obj);
-                
-  
                 }
             }
        
@@ -409,7 +400,8 @@ async function approvedLeave(userID, params) {
         compoOffService.create(objcCompoOff);
       }
 
-    return omitHash(user.get());
+    // return omitHash(user.get());
+    return user.get();
 
 }
 
@@ -442,6 +434,7 @@ async function getUserIDDate(userID,params) {
     let currentdate = params
     const user = await db.Leave.findOne({ where: { userID: userID,startDate:currentdate } })
     if (!user) throw ' Not found';
+   
     return user;
 }
 

@@ -3,7 +3,8 @@ const { required } = require('joi');
 const router = express.Router();
 const Joi = require('joi');
 const validateRequest = require('_middleware/validate-request');
-const authorizehr = require('_middleware/authorize')
+const authorizehr = require('_middleware/authorizeHr')
+
 const {successResponse} = require('../_middleware/error-handler')
 const userService = require('./hr.service');
 
