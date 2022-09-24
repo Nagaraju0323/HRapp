@@ -142,6 +142,7 @@ async function create(params) {
     params.Doj = "0"
     params.bankName = "0"
     params.PAN = "0"
+    params.IFCSCode = "0"
     params.bloodgroup = "0"
     
 
@@ -240,13 +241,14 @@ async function updateuserBank(userID, params) {
     objc.Doj = params.Doj
     objc.bankName = params.bankName;
     objc.PAN = params.PAN
+    objc.IFCSCode = params.IFCSCode
     
    
     // copy params to user and save
     Object.assign(user, objc);
     await user.save();
 
-    return omitHash(user.get());
+    // return omitHash(user.get());
 }
 
 //...reset Password userInfo

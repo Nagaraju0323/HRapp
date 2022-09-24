@@ -21,6 +21,8 @@ module.exports = {
     create,
     update,
     updatehr,
+    getUserDeatils,
+    hrDeatailsUpdate,
     delete: _delete,
     sendOTPforgot,
     sendOTPforgotMobile,
@@ -128,6 +130,18 @@ async function updatehr(email, params) {
     await user.save();
     return omitHash(user.get());
 }
+//HR deatils Update 
+async function hrDeatailsUpdate(params) {
+    console.log(params)
+    const user = await getUserDeatils(params.userID);
+    console.log('update')
+    
+    // params.activeStatus = 1
+    Object.assign(user, params);
+    await user.save();
+    return omitHash(user.get());
+}
+
 
 
 async function _delete(id) {
@@ -149,6 +163,17 @@ async function getUseremail(email) {
     if (!user) throw 'HR not found';
     return user;
 }
+//get user Details with userID
+
+async function getUserDeatils(userID) {
+     
+    console.log('this message',userID)
+    const user = await db.Hr.findOne({ where: { userID: userID}});
+    
+    if (!user) throw 'HR not found';
+    return user;
+}
+
 
 
 function omitHash(user) {

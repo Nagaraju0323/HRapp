@@ -45,15 +45,6 @@ async function getAll() {
 async function update(id, params) {
     const user = await getUser(id);
 
-    // validate
- 
-    // if (await db.Event.findOne({ where: { id: params.id } })) {
-    //     throw 'Department "' + params.DepName + '" is already taken';
-    // }
-
-    
-
-    // copy params to user and save
     Object.assign(user, params);
     await user.save();
 

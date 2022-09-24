@@ -21,6 +21,7 @@ module.exports = {
     getAll,
     create,
     getAllbyId,
+    getAllLeaveType,
     getbyDate,
     getleaveDate,
     update,
@@ -51,23 +52,16 @@ async function getAll() {
     let user = db.Leave.findAll()
      return await user;
 }
+//getbytleaveType
+async function getAllLeaveType(userID,leaveType) {
+    console.log('leavetype',leaveType)
+    const user = await db.Leave.findAndCountAll({ where: { userID:userID,leaveType:leaveType } });
+    return await user.rows
+}
 
 
 async function getAllbyId(userID) {
     const user = await db.Leave.findAndCountAll({ where: { userID } });
-    // if (user.count ==0){
-    //     data = {
-    //         "error":'Search Items Notfound',
-    //         status : 400
-    //      }
-    // }
-    // if (user.count !=0){
-    //     data = {
-    //         count: user.count,
-    //         data: user.rows,
-    //         status : 0
-    //      }
-    // }
     return await user.rows
 }
 
@@ -300,16 +294,22 @@ async function getleaveDate(startDate,userID) {
     return await user
 }
 
+async function getbyDiffDate(startDate) {
+    let startdate = startDate 
+    // let  endDate = startDate.setDate(startDate + 10);
+    // let endDate = params.endDate
+   
+    var someDate = new Date(startDate);
+    someDate.setDate(someDate.getDate() + 10); //number  of days to add, e.x. 15 days
+    var endDate = someDate.toISOString().substr(0,10);
 
 
-
-async function getbyDiffDate(userID,params) {
-    let startdate = params.startDate 
-    let endDate = params.endDate
+    console.log('leave details,',endDate)
 
     const user = await db.Leave.findAll({
         where: {
-            userID:userID,
+            // userID:userID,
+            leaveStatus:3,
             [Op.or]: [{
                 startDate: {
                     [Op.between]: [startdate, endDate]
@@ -321,20 +321,8 @@ async function getbyDiffDate(userID,params) {
             }]
         },
     })
-    
-    if (user.count == 0){
-        data = {
-            "error":'Search Items Notfound',
-            status : 400
-         }
-    }
-    if (user.count !=0){
-         data = {
-            data: user,
-            status : 0
-         }
-    }
-    return await data
+ 
+    return await user
     
 }
 
@@ -401,7 +389,7 @@ async function approvedLeave(userID, params) {
       }
 
     // return omitHash(user.get());
-    return user.get();
+    // return user.get();
 
 }
 

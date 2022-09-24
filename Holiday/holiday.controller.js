@@ -3,12 +3,14 @@ const router = express.Router();
 const Joi = require('joi');
 const validateRequest = require('_middleware/validate-request');
 const authorize = require('_middleware/authorize')
+const authorizehr = require('_middleware/authorizeHr')
 const userService = require('./holiday.service');
 const usershortid  = require("shortid");
 const {successResponse} = require('../_middleware/error-handler')
 
 router.post('/addHoliday',authorize(),registerSchema, addHoliday);
-router.get('/getallHolidays', getAll);
+router.get('/getallHolidays',authorize(), getAll);
+router.get('/getallHolidaysList',authorizehr(), getAllhr);
 router.get('/:id', getById);
 router.put('/:id', updateSchema, update);
 router.delete('/:id', _delete);
@@ -23,17 +25,17 @@ function getEmails(req, res, next) {
         .catch(next);
 }
 
+function getAllhr(req, res, next) {
+    userService.getAll()
+ 
+        .then(users => successResponse(res,users,0,'success'))
+        .catch(next);
+}
 
 
 function getAll(req, res, next) {
     userService.getAll()
-        // .then(users => res.json(
-        //     data = {
-                
-        //         data: users,
-        //         status : 200
-        //      }
-        // ))
+ 
         .then(users => successResponse(res,users,0,'success'))
         .catch(next);
 }

@@ -14,12 +14,15 @@ const {successResponse} = require('../_middleware/error-handler')
 
 router.post('/applyLeave',authorize(), applyLeaveModel, applyLeaves);
 router.get('/getAllLeave',authorize(), getLeaves);
+router.get('/getAllLeaveType',authorize(), getLeavesTypes);
 router.post('/compareLvm', authorize(), compareLeave);
 router.get('/getLeavebyID',authorize(), getLeavesbyID);
 router.get('/getLeavedate',authorize(),getleavedate);
 router.get('/getLeavebydate',authorize(), getLeavesbyDate);
 router.get('/hrgetLeavebydate',authorizehrs(), getLeavesbyDate);
+router.get('/getLeavebyDiff',authorizehrs(), hrgetLeavesDiffDate);
 router.get('/getLeavebyDiff',authorize(), getLeavesDiffDate);
+
 router.put('/updateLeave', authorize(), updateSchema, update);
 router.put('/approveLeave', authorizehrs(), approveLeave);
 router.delete('/deleteLeave', authorize(), _delete);
@@ -57,6 +60,12 @@ function getLeaves(req, res, next) {
         .then(users => successResponse(res,users,0,'success'))
         .catch(next);
 }
+//getLeavesTypes
+function getLeavesTypes(req, res, next) {
+    userService.getAllLeaveType(req.query.userID,req.query.leaveType)
+        .then(users => successResponse(res,users,0,'success'))
+        .catch(next);
+}
 
 function getLeavesbyDate(req, res, next) {
     // console.log('this is');
@@ -75,12 +84,17 @@ function getleavedate(req, res, next) {
 }
 
 
-
+function hrgetLeavesDiffDate(req, res, next) {
+    const id = req.params.userID;
+    userService.getbyDiffDate(req.query.startDate)
+        .then(users => successResponse(res,users,0,'success'))
+        .catch(next => filure);
+}
 
 
 function getLeavesDiffDate(req, res, next) {
     const id = req.params.userID;
-    userService.getbyDiffDate(req.body.userID,req.body)
+    userService.getbyDiffDate(req.query.startDate)
         .then(users => successResponse(res,users,0,'success'))
         .catch(next => filure);
 }

@@ -17,6 +17,7 @@ router.get('/hrdetails', authorizehr(), getAll);
 router.get('/current', authorizehr(), getCurrent);
 router.get('/:id', authorizehr(), getById);
 router.put('/activateHr', authorizehr(), updateSchemaHr, updateHr);
+router.put('/hrProfileUpdate', authorizehr(), updateSchema_hr, hrProfileUpdate);
 router.put('/:id', authorizehr(), updateSchema, update);
 router.put('/hrresetPassword', authorizehr(),hrresetPassword);
 router.delete('/:id', authorizehr(), _delete);
@@ -129,6 +130,19 @@ function updateSchema(req, res, next) {
     });
     validateRequest(req, next, schema);
 }
+function updateSchema_hr(req, res, next) {
+    const schema = Joi.object({
+        firstName: Joi.string().empty(''),
+        lastName: Joi.string().empty(''),
+        email: Joi.string().empty(''),
+        mobileNo: Joi.string().empty(''),
+        profileImg: Joi.string().required(),
+        userID: Joi.string().required(),
+       
+    });
+    validateRequest(req, next, schema);
+}
+
 
 function updateSchemaHr(req, res, next) {
     const schema = Joi.object({
@@ -147,6 +161,13 @@ function update(req, res, next) {
 function updateHr(req, res, next) {
     userService.updatehr(req.params.email, req.body)
         .then(user => res.json(user))
+        .catch(next);
+}
+//hrDetailsUpdate 
+
+function hrProfileUpdate(req, res, next) {
+    userService.hrDeatailsUpdate(req.body)
+    .then(users => successResponse(res,users,0,'success'))
         .catch(next);
 }
 

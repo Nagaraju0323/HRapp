@@ -21,12 +21,9 @@ router.get('/current', authorize(), getCurrent);
 router.get('/userDeatils', authorize(), getByUser);
 router.get('/getuserDetails', authorizehrs(), getuserDetails);
 router.get('/:id', authorize(), getById);
-
-
-
-
 router.put('/resetPassword', authorize(),resetPassword);
 router.put('/userProfileupdate', authorize(), updateSchema, userupdate);
+router.put('/userBankDetails', authorize(), userBankDetailsUpdate);
 router.put('/profilePicupdate', authorize(), userprofileupdate);
 router.delete('/deleteuser', authorize(), user_delete);
 router.post('/sentOtptoemail', sentOtptoemail);
@@ -177,6 +174,13 @@ function updateUserDetails(req, res, next) {
     .then(users => successResponse(res,users,0,'success'))
         .catch(next);
 }
+
+function userBankDetailsUpdate(req, res, next) {
+    userService.updateuserBank(req.body.userID, req.body)
+    .then(users => successResponse(res,users,0,'success'))
+        .catch(next);
+}
+
 
 
 //...Reset Password

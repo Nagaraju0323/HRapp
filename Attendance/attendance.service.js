@@ -282,7 +282,13 @@ async function leaveAttendance(params) {
     obj.holidayStatus = params.holidayStatus;
     obj.leaveStatus = params.leaveStatus;
     obj.present = params.present;
-    
+    obj.presentDay = "0"
+    obj.absentDay = "0"
+    obj.inStatus = "0"
+    obj.outStatus = "0"
+    obj.inTime = "0"
+    obj.outTime = "0"       
+    obj.leaveCount = "0"
     await db.Attendace.create(obj);
 
 }
